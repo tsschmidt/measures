@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
+import LengthType.*
 
 /**
  * Enum implementing [MeasureType] to provide units of [Length] being represented with functions for creating and converting.
@@ -18,14 +19,35 @@ enum class LengthType(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double
-) : MeasureType {
-    INCH("in", inToCm, cmToIn),
-    CM("cm", identity, identity),
-    METER("m", mToCm, cmToM),
-    FOOT("ft", ftToCm, cmToFt),
-    KILOMETER("km", kmToCm, cmToKm),
-    MILE("mil", milToCm, cmToMil),
-    YARD("yd", ydToCm, cmToYd)
+) : MeasureType<Length> {
+    INCH("in", inToCm, cmToIn) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Inch(v) as T
+                               },
+    CM("cm", identity, identity) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Centimeter(v) as T
+                                 },
+    METER("m", mToCm, cmToM) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Meter(v) as T
+                             },
+    FOOT("ft", ftToCm, cmToFt) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Foot(v) as T
+                               },
+    KILOMETER("km", kmToCm, cmToKm) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Kilometer(v) as T
+                                    },
+    MILE("mil", milToCm, cmToMil) {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Mile(v) as T
+                                  },
+    YARD("yd", ydToCm, cmToYd){
+        @Suppress("UNCHECKED_CAST")
+        override fun <T> create(v: Double): T = Yard(v) as T
+    }
 }
 
 /**
@@ -33,44 +55,17 @@ enum class LengthType(
  */
 @Serializable
 @JsExport
-sealed class Length : BaseMeasure(), Comparable<Length> {
+@Suppress("UNUSED")
+sealed class Length(override val type: MeasureType<Length>) : BaseMeasure(), Comparable<Length> {
     /* Properties used to access this Gravity's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
-    val inches by lazy { LengthType.INCH.fromBase(base) }
-    val cm by lazy { LengthType.CM.fromBase(base) }
-    val meter by lazy { LengthType.METER.fromBase(base) }
-    val feet by lazy { LengthType.FOOT.fromBase(base) }
-    val kilometer by lazy { LengthType.KILOMETER.fromBase(base) }
-    val mile by lazy { LengthType.MILE.fromBase(base) }
-    val yard by lazy { LengthType.YARD.fromBase(base) }
-
-    @Suppress("UNUSED")
-    /** Returns the Length's value in inches in a new [Inch] instance. */
-    fun toInches() = Inch(inches)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in centimeters in a new [Centimeter] instance. */
-    fun toCM() = Centimeter(cm)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in meters in a new [Meter] instance. */
-    fun toMeter() = Meter(meter)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in feet in a new [Foot] instance. */
-    fun toFeet() = Foot(feet)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in yards in a new [Yard] instance. */
-    fun toYard() = Yard(yard)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in kilometers in a new [Kilometer] instance. */
-    fun toKilometer() = Kilometer(kilometer)
-
-    @Suppress("UNUSED")
-            /** Returns the Length's value in miles in a new [Mile] instance. */
-    fun toMile() = Mile(mile)
+    val inches by lazy { INCH.fromBase(base) }
+    val cm by lazy { CM.fromBase(base) }
+    val meter by lazy { METER.fromBase(base) }
+    val feet by lazy { FOOT.fromBase(base) }
+    val kilometer by lazy { KILOMETER.fromBase(base) }
+    val mile by lazy { MILE.fromBase(base) }
+    val yard by lazy { YARD.fromBase(base) }
 
     override fun equals(other: Any?) = other != null && other is Length && base == other.base
 
@@ -78,38 +73,41 @@ sealed class Length : BaseMeasure(), Comparable<Length> {
 
     override fun compareTo(other: Length): Int = base.compareTo(other.base)
 
-    operator fun <T : Length> plus(o: Length) : T = create(type.fromBase(base + o.base))
+    operator fun <T : Length> plus(o: Length) : T = type.create(type.fromBase(base + o.base))
 
-    operator fun <T : Length> minus(o: Length): T = create(type.fromBase(base - o.base))
+    operator fun <T : Length> minus(o: Length): T = type.create(type.fromBase(base - o.base))
 
-    operator fun <T : Length> times(o: Length): T = create(type.fromBase(base * o.base))
+    operator fun <T : Length> times(o: Length): T = type.create(type.fromBase(base * o.base))
 
-    operator fun <T : Length> div(o: Length): T = create(type.fromBase(base / o.base))
+    operator fun <T : Length> div(o: Length): T = type.create(type.fromBase(base / o.base))
 
-    operator fun <T : Length> rem(o: Length): T = create(type.fromBase(base % o.base))
+    operator fun <T : Length> rem(o: Length): T = type.create(type.fromBase(base % o.base))
 
-    operator fun <T : Length> unaryPlus(): T = create(-value)
+    operator fun <T : Length> unaryPlus(): T = type.create(-value)
 
-    operator fun <T : Length> unaryMinus(): T = create(+value)
+    operator fun <T : Length> unaryMinus(): T = type.create(+value)
 
-    operator fun <T : Length> inc(): T = create(value + 1.0)
+    operator fun <T : Length> inc(): T = type.create(value + 1.0)
 
-    operator fun <T : Length> dec(): T = create(value - 1.0)
+    operator fun <T : Length> dec(): T = type.create(value - 1.0)
 
     @JsName("plusDouble")
-    operator fun <T : Length> plus(v: Double): T = create(value + v)
+    operator fun <T : Length> plus(v: Double): T = type.create(value + v)
 
     @JsName("minusDouble")
-    operator fun <T : Length> minus(v: Double): T = create(value - v)
+    operator fun <T : Length> minus(v: Double): T = type.create(value - v)
 
     @JsName("timesDouble")
-    operator fun <T : Length> times(v: Double): T = create(value * v)
+    operator fun <T : Length> times(v: Double): T = type.create(value * v)
 
     @JsName("divDouble")
-    operator fun <T : Length> div(v: Double): T = create(value / v)
+    operator fun <T : Length> div(v: Double): T = type.create(value / v)
 
     @JsName("remDouble")
-    operator fun <T : Length> rem(v: Double): T = create(value % v)
+    operator fun <T : Length> rem(v: Double): T = type.create(value % v)
+
+    @JsName("convert")
+    operator fun <T : Length> invoke(type: LengthType): T = type.create(type.fromBase(base))
 }
 
 /**
@@ -118,12 +116,7 @@ sealed class Length : BaseMeasure(), Comparable<Length> {
 @Serializable
 @SerialName("inch")
 @JsExport
-class Inch(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.INCH
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Inch(v) as T
-}
+class Inch(override val value: Double = 0.0) : Length(INCH)
 
 /**
  * Class representing [Length] in centimeters.
@@ -131,12 +124,7 @@ class Inch(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("centimeter")
 @JsExport
-class Centimeter(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.CM
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Centimeter(v) as T
-}
+class Centimeter(override val value: Double = 0.0) : Length(CM)
 
 /**
  * Class representing [Length] in meters.
@@ -144,12 +132,7 @@ class Centimeter(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("meter")
 @JsExport
-class Meter(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.METER
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Meter(v) as T
-}
+class Meter(override val value: Double = 0.0) : Length(METER)
 
 /**
  * Class representing [Length] in feet.
@@ -157,12 +140,7 @@ class Meter(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("inch")
 @JsExport
-class Foot(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.FOOT
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Foot(v) as T
-}
+class Foot(override val value: Double = 0.0) : Length(FOOT)
 
 /**
  * Class representing [Length] in kilometers.
@@ -170,12 +148,7 @@ class Foot(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("kilometer")
 @JsExport
-class Kilometer(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.KILOMETER
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Kilometer(v) as T
-}
+class Kilometer(override val value: Double = 0.0) : Length(KILOMETER)
 
 /**
  * Class representing [Length] in miles.
@@ -183,12 +156,7 @@ class Kilometer(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("mile")
 @JsExport
-class Mile(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.MILE
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T = Mile(v) as T
-}
+class Mile(override val value: Double = 0.0) : Length(MILE)
 
 /**
  * Class representing [Length] in yards.
@@ -196,12 +164,7 @@ class Mile(override val value: Double = 0.0) : Length() {
 @Serializable
 @SerialName("yard")
 @JsExport
-class Yard(override val value: Double = 0.0) : Length() {
-    override val type: MeasureType = LengthType.YARD
-
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Measure> create(v: Double): T  = Yard(v) as T
-}
+class Yard(override val value: Double = 0.0) : Length(YARD)
 
 /** Constants used to convert [Length] values to base units */
 const val CM_INCH = 2.54

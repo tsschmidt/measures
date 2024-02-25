@@ -8,11 +8,11 @@ import kotlin.js.JsExport
 
 
 @JsExport
-interface MeasureType {
+interface MeasureType<out T> {
     val units: String
-    //val create: (Double) -> T
     val toBase: (Double) -> (Double)
     val fromBase: (Double) -> (Double)
+    fun <T> create(v: Double): T
 }
 
 /**
@@ -23,8 +23,7 @@ interface MeasureType {
 sealed interface Measure {
     val value: Double
     val base: Double
-    val type: MeasureType
-    //val create: (Double) -> T
+    val type: MeasureType<*>
 }
 
 @JsExport
@@ -37,7 +36,9 @@ sealed class BaseMeasure : Measure {
         return format(2)
     }
 
-    protected abstract fun <T : Measure> create(v: Double): T
+    // protected abstract fun <T : Measure> create(v: Double): T
+
+    operator fun invoke() = value
 
 }
 
