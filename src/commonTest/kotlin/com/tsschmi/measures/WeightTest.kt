@@ -1,4 +1,6 @@
-
+package com.tsschmi.measures
+import com.tsschmi.measures.Kilogram
+import com.tsschmi.measures.Pound
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test

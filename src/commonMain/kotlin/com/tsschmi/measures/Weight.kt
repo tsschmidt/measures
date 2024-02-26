@@ -1,11 +1,13 @@
 @file:OptIn(ExperimentalJsExport::class, ExperimentalSerializationApi::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import WeightType.*
+import com.tsschmi.measures.WeightType.*
 import kotlinx.serialization.ExperimentalSerializationApi
 
 /**

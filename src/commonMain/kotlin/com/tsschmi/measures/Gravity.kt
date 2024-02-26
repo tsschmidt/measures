@@ -1,11 +1,13 @@
 @file:OptIn(ExperimentalJsExport::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import GravityType.*
+import com.tsschmi.measures.GravityType.*
 
 /**
  * Enum implementing [MeasureType] to provide units of [Gravity] being represented with functions for creating and converting.

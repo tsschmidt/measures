@@ -1,3 +1,5 @@
+package com.tsschmi.measures
+
 import kotlin.test.Test
 
 class TimeTest {

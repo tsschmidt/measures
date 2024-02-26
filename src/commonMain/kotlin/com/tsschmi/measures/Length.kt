@@ -1,11 +1,13 @@
 @file:OptIn(ExperimentalJsExport::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import LengthType.*
+import com.tsschmi.measures.LengthType.*
 
 /**
  * Enum implementing [MeasureType] to provide units of [Length] being represented with functions for creating and converting.

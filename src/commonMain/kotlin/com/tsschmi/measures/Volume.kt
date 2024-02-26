@@ -1,11 +1,13 @@
 @file:OptIn(ExperimentalJsExport::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import VolumeType.*
+import com.tsschmi.measures.VolumeType.*
 
 @JsExport
 @Serializable

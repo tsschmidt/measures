@@ -1,11 +1,13 @@
 @file:OptIn(ExperimentalJsExport::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
-import TimeType.*
+import com.tsschmi.measures.TimeType.*
 
 /**
  * Enum implementing [MeasureType] to provide units of [Time] being represented with functions for creating and converting.
@@ -216,7 +218,7 @@ val sToM = { v: Double -> v / SECONDS_IN_A_MINUTE }
 val hToS = { v: Double -> v * SECONDS_IN_A_HOUR }
 val sToH = { v: Double -> v / SECONDS_IN_A_HOUR }
 val dayToS = { v: Double -> v * SECONDS_IN_A_DAY }
-val sToDay = { v: Double -> v / SECONDS_IN_A_DAY}
+val sToDay = { v: Double -> v / SECONDS_IN_A_DAY }
 val wkToS = { v: Double -> v * SECONDS_IN_A_WEEK }
 val sToWk = { v: Double -> v / SECONDS_IN_A_WEEK }
 val mthToS = { v: Double -> v * SECONDS_IN_A_MONTH }

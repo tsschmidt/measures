@@ -1,3 +1,7 @@
+package com.tsschmi.measures
+
+import com.tsschmi.measures.Centimeter
+import com.tsschmi.measures.Inch
 import kotlin.test.Test
 
 class LengthTest {

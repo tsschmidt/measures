@@ -1,5 +1,7 @@
 @file:OptIn(ExperimentalSerializationApi::class, ExperimentalJsExport::class)
 
+package com.tsschmi.measures
+
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.JsonClassDiscriminator
