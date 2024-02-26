@@ -24,9 +24,9 @@ sealed class DilutionType(
 ) : MeasureType<Dilution> {
 
     @Serializable
-    object PPM : DilutionType("ppm", identity, identity) {
+    data object PartsPerMillionType : DilutionType("ppm", identity, identity) {
         @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = PPM(v) as T
+        override fun <T> create(v: Double): T = PartsPerMillion(v) as T
     }
 }
 
@@ -85,7 +85,7 @@ sealed class Dilution : BaseMeasure(), Comparable<Dilution> {
 @Serializable
 @SerialName("ppm")
 @JsExport
-class PPM(override val value: Double = 0.0) : Dilution() {
-    override val type = DilutionType.PPM
+class PartsPerMillion(override val value: Double = 0.0) : Dilution() {
+    override val type = DilutionType.PartsPerMillionType
 }
 

@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalJsExport::class, ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalJsExport::class)
 
 package com.tsschmi.measures
 
@@ -8,7 +8,6 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import com.tsschmi.measures.WeightType.*
-import kotlinx.serialization.ExperimentalSerializationApi
 
 /**
  * Enum used to designate the unit of [Weight] being represented with functions for creating and converting.
@@ -26,25 +25,25 @@ sealed class WeightType(
 ) : MeasureType<Weight> {
 
     @Serializable
-    data object KILOGRAM : WeightType("kg", kgToLb, lbToKg) {
+    data object KilogramType : WeightType("kg", kgToLb, lbToKg) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Kilogram(v) as T
     }
 
     @Serializable
-    data object GRAM : WeightType("g", gToLb, lbToG) {
+    data object GramType : WeightType("g", gToLb, lbToG) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Gram(v) as T
     }
 
     @Serializable
-    data object POUND : WeightType("lb", identity, identity) {
+    data object PoundType : WeightType("lb", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Pound(v) as T
     }
 
     @Serializable
-    data object OUNCE : WeightType("oz", ozToLb, lbToOz) {
+    data object OunceType : WeightType("oz", ozToLb, lbToOz) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Ounce(v) as T
     }
@@ -60,10 +59,10 @@ sealed class Weight : Amount(), Comparable<Weight> {
 
     /* Properties used to access this Weight's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
-    val kilogram by lazy { KILOGRAM.fromBase(base) }
-    val gram by lazy { GRAM.fromBase(base) }
-    val pound by lazy { POUND.fromBase(base) }
-    val ounce by lazy { OUNCE.fromBase(base) }
+    val kilogram by lazy { KilogramType.fromBase(base) }
+    val gram by lazy { GramType.fromBase(base) }
+    val pound by lazy { PoundType.fromBase(base) }
+    val ounce by lazy { OunceType.fromBase(base) }
 
     /**
      * Default toString to display value with 2 significant digits without units.
@@ -122,7 +121,7 @@ sealed class Weight : Amount(), Comparable<Weight> {
 @SerialName("kilogram")
 @JsExport
 class Kilogram(override val value: Double = 0.0) : Weight() {
-    override val type = KILOGRAM
+    override val type = KilogramType
 }
 
 /**
@@ -134,7 +133,7 @@ class Kilogram(override val value: Double = 0.0) : Weight() {
 @SerialName("gram")
 @JsExport
 class Gram(override val value: Double = 0.0) : Weight() {
-    override val type = GRAM
+    override val type = GramType
 }
 
 /**
@@ -146,7 +145,7 @@ class Gram(override val value: Double = 0.0) : Weight() {
 @SerialName("pound")
 @JsExport
 class Pound(override val value: Double = 0.0) : Weight() {
-    override val type = POUND
+    override val type = PoundType
 }
 
 /**
@@ -158,7 +157,7 @@ class Pound(override val value: Double = 0.0) : Weight() {
 @SerialName("ounce")
 @JsExport
 class Ounce(override val value: Double = 0.0): Weight() {
-    override val type = OUNCE
+    override val type = OunceType
 }
 
 /* Constants used for converting from base unit(pounds) to other units */

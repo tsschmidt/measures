@@ -20,16 +20,16 @@ sealed class RatioType(
 ) : MeasureType<Ratio> {
 
     @Serializable
-    object WEIGHT_VOLUME : RatioType()
+    data object WeightToVolumeType : RatioType()
 
     @Serializable
-    object VOLUME_WEIGHT : RatioType()
+    data object VolumeToWeightType : RatioType()
 
     @Serializable
-    object FLOW : RatioType()
+    data object FlowType : RatioType()
 
     @Serializable
-    object VELOCITY : RatioType()
+    data object VelocityType : RatioType()
 
     override fun <T> create(v: Double): T {
         TODO("Not yet implemented")
@@ -86,6 +86,8 @@ sealed class Ratio : BaseMeasure() {
 
     @JsName("remDouble")
     operator fun <T : Ratio> rem(v: Double): T = create(value % v)
+
+    override fun display(d: Int): String = "${format(d)}${units}"
 }
 
 /**
@@ -104,7 +106,7 @@ class WeightToVolume(
     override val d: VolumeType
 ) : Ratio(), Comparable<WeightToVolume> {
 
-    override val type = RatioType.WEIGHT_VOLUME
+    override val type = RatioType.WeightToVolumeType
 
     override fun equals(other: Any?) = other != null && other is WeightToVolume && base == other.base
 
@@ -146,7 +148,7 @@ class VolumeToWeight(
     override val d: WeightType
 ) : Ratio(), Comparable<VolumeToWeight> {
 
-    override val type = RatioType.VOLUME_WEIGHT
+    override val type = RatioType.VolumeToWeightType
 
     override fun equals(other: Any?) = other != null && other is VolumeToWeight && base == other.base
 
@@ -188,7 +190,7 @@ class Flow(
     override val d: TimeType
 ) : Ratio(), Comparable<Flow> {
 
-    override val type = RatioType.FLOW
+    override val type = RatioType.FlowType
 
     override fun equals(other: Any?) = other != null && other is Flow && base == other.base
 
@@ -230,7 +232,7 @@ class Velocity(
     override val d: TimeType
 ) : Ratio(), Comparable<Velocity> {
 
-    override val type = RatioType.VELOCITY
+    override val type = RatioType.VelocityType
 
     override fun equals(other: Any?) = other != null && other is Velocity && base == other.base
 

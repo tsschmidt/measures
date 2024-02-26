@@ -25,31 +25,31 @@ sealed class GravityType(
 ) : MeasureType<Gravity> {
 
     @Serializable
-    object GRAVITY_POINTS : GravityType("ppg", identity, identity) {
+    data object GravityPointType : GravityType("ppg", identity, identity) {
         @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = GP(v) as T
+        override fun <T> create(v: Double): T = GravityPoint(v) as T
     }
 
     @Serializable
-    object SPECIFIC_GRAVITY : GravityType("sg", sgToGp, gpToSg) {
+    data object SpecificGravityType : GravityType("sg", sgToGp, gpToSg) {
         @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = SG(v) as T
+        override fun <T> create(v: Double): T = SpecificGravity(v) as T
     }
 
     @Serializable
-    object BRIX : GravityType("brix", brixToGp, gpToBrix) {
+    data object BrixType : GravityType("brix", brixToGp, gpToBrix) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Brix(v) as T
     }
 
     @Serializable
-    object PLATO : GravityType("P", platoToGp, gpToPlato) {
+    data object PlatoType : GravityType("P", platoToGp, gpToPlato) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Plato(v) as T
     }
 
     @Serializable
-    object YIELD : GravityType("%", yieldToGp, gpToYield) {
+    data object YieldType : GravityType("%", yieldToGp, gpToYield) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Yield(v) as T
     }
@@ -64,11 +64,11 @@ sealed class GravityType(
 sealed class Gravity : BaseMeasure(), Comparable<Gravity> {
     /* Properties used to access this Gravity's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
-    val gravityPoints by lazy { GRAVITY_POINTS.fromBase(base) }
-    val specificGravity by lazy { SPECIFIC_GRAVITY.fromBase(base) }
-    val brix by lazy { BRIX.fromBase(base) }
-    val plato by lazy { PLATO.fromBase(base) }
-    val yield by lazy { YIELD.fromBase(base) }
+    val gravityPoints by lazy { GravityPointType.fromBase(base) }
+    val specificGravity by lazy { SpecificGravityType.fromBase(base) }
+    val brix by lazy { BrixType.fromBase(base) }
+    val plato by lazy { PlatoType.fromBase(base) }
+    val yield by lazy { YieldType.fromBase(base) }
 
     override fun equals(other: Any?) = other != null && other is Gravity && base == other.base
 
@@ -119,8 +119,8 @@ sealed class Gravity : BaseMeasure(), Comparable<Gravity> {
 @Serializable
 @SerialName("gp")
 @JsExport
-class GP(override val value: Double = 0.0) : Gravity() {
-    override val type = GRAVITY_POINTS
+class GravityPoint(override val value: Double = 0.0) : Gravity() {
+    override val type = GravityPointType
 }
 
 /**
@@ -130,7 +130,7 @@ class GP(override val value: Double = 0.0) : Gravity() {
 @SerialName("brix")
 @JsExport
 class Brix(override val value: Double = 0.0) : Gravity() {
-    override val type = BRIX
+    override val type = BrixType
 }
 
 /**
@@ -139,8 +139,8 @@ class Brix(override val value: Double = 0.0) : Gravity() {
 @Serializable
 @SerialName("sg")
 @JsExport
-class SG(override val value: Double = 0.0) : Gravity() {
-    override val type = SPECIFIC_GRAVITY
+class SpecificGravity(override val value: Double = 0.0) : Gravity() {
+    override val type = SpecificGravityType
 
     /**
      * Overridden toString method to display specific gravity to 4 digits significance.
@@ -155,7 +155,7 @@ class SG(override val value: Double = 0.0) : Gravity() {
 @SerialName("plato")
 @JsExport
 class Plato(override val value: Double = 0.0) : Gravity() {
-    override val type = PLATO
+    override val type = PlatoType
 }
 
 /**
@@ -165,7 +165,7 @@ class Plato(override val value: Double = 0.0) : Gravity() {
 @SerialName("yield")
 @JsExport
 class Yield(override val value: Double = 0.0) : Gravity() {
-    override val type = YIELD
+    override val type = YieldType
 }
 
 /** Functions to convert [Gravity] values from base unit to other units */

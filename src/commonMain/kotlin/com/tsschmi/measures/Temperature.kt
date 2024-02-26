@@ -18,13 +18,13 @@ sealed class TemperatureType(
 ) : MeasureType<Temperature> {
 
     @Serializable
-    object FAHRENHEIT : TemperatureType("\u00B0F", identity, identity) {
+    data object FahrenheitType : TemperatureType("\u00B0F", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Fahrenheit(v) as T
     }
 
     @Serializable
-    object CELSIUS : TemperatureType("\u00B0C", ctoF, fToC) {
+    data object CelsiusType : TemperatureType("\u00B0C", ctoF, fToC) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Celsius(v) as T
     }
@@ -38,8 +38,8 @@ sealed class TemperatureType(
 sealed class Temperature : BaseMeasure(), Comparable<Temperature> {
     /* Properties used to access this Temperature's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
-    val fahrenheit by lazy { FAHRENHEIT.fromBase(base) }
-    val celsius by lazy { CELSIUS.fromBase(base) }
+    val fahrenheit by lazy { FahrenheitType.fromBase(base) }
+    val celsius by lazy { CelsiusType.fromBase(base) }
 
     /** Returns the Temperature's value in seconds in a new [Fahrenheit] instance. */
     @Suppress("UNUSED")
@@ -96,7 +96,7 @@ sealed class Temperature : BaseMeasure(), Comparable<Temperature> {
 @SerialName("fahrenheit")
 @JsExport
 class Fahrenheit(override val value: Double = 0.0) : Temperature() {
-    override val type = FAHRENHEIT
+    override val type = FahrenheitType
 }
 
 /**
@@ -106,7 +106,7 @@ class Fahrenheit(override val value: Double = 0.0) : Temperature() {
 @SerialName("celsius")
 @JsExport
 class Celsius(override val value: Double = 0.0) : Temperature() {
-    override val type = CELSIUS
+    override val type = CelsiusType
 }
 
 /** Functions for converting [Temperature] values form base units to other units. */
