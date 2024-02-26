@@ -6,9 +6,9 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 
-
 @JsExport
-interface MeasureType<out T> {
+@Serializable
+sealed interface MeasureType<T> {
     val units: String
     val toBase: (Double) -> (Double)
     val fromBase: (Double) -> (Double)
@@ -19,6 +19,7 @@ interface MeasureType<out T> {
  * Defining interface for all implementations.
  */
 @JsExport
+@Serializable
 @JsonClassDiscriminator("class")
 sealed interface Measure {
     val value: Double
@@ -27,7 +28,7 @@ sealed interface Measure {
 }
 
 @JsExport
-@JsonClassDiscriminator("class")
+@Serializable
 sealed class BaseMeasure : Measure {
     fun display(d: Int): String = "${format(d)}${type.units}"
     fun format(d: Int = 2): String = formatNumber(value, d)
@@ -36,10 +37,7 @@ sealed class BaseMeasure : Measure {
         return format(2)
     }
 
-    // protected abstract fun <T : Measure> create(v: Double): T
-
     operator fun invoke() = value
-
 }
 
 /**

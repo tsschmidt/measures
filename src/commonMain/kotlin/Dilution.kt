@@ -14,12 +14,15 @@ import kotlin.js.JsName
  * @param fromBase - Function that returns the [Dilution] value in the configured units from the base unit.
  */
 @JsExport
-enum class DilutionType(
+@Serializable
+sealed class DilutionType(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double
 ) : MeasureType<Dilution> {
-    PPM("ppm", identity, identity) {
+
+    @Serializable
+    object PPM : DilutionType("ppm", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = PPM(v) as T
     }
@@ -30,7 +33,7 @@ enum class DilutionType(
  */
 @Serializable
 @JsExport
-sealed class Dilution(override val type: MeasureType<Dilution>) : BaseMeasure(), Comparable<Dilution> {
+sealed class Dilution : BaseMeasure(), Comparable<Dilution> {
     //abstract fun <T : Dilution> create(value: Double): T = PPM(value) as T
     override val base by lazy { type.toBase(value) }
 
@@ -80,5 +83,7 @@ sealed class Dilution(override val type: MeasureType<Dilution>) : BaseMeasure(),
 @Serializable
 @SerialName("ppm")
 @JsExport
-class PPM(override val value: Double = 0.0) : Dilution(DilutionType.PPM)
+class PPM(override val value: Double = 0.0) : Dilution() {
+    override val type = DilutionType.PPM
+}
 

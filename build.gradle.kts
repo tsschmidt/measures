@@ -35,7 +35,7 @@ kotlin {
             }
         }
         compilations["main"].packageJson {
-            customField("types", "kotlin/brewly-kmp.d.ts")
+            customField("types", "kotlin/measures.d.ts")
         }
         generateTypeScriptDefinitions()
         binaries.executable()

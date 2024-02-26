@@ -1,5 +1,7 @@
-import org.junit.jupiter.api.Test
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlin.test.Test
 
 class WeightTest {
 
@@ -7,9 +9,17 @@ class WeightTest {
     fun testEquals() {
         val k = Kilogram(1.0)
         val k1: Kilogram = k + Kilogram(2.0)
-        println(k1)
+        println("${k1()}, ${k1.gram}, ${k1.ounce}, ${k1.pound}")
     }
 
+    @Test
+    fun testSerialization() {
+        val sg: Pound = Pound(1.0)
+        val json = Json.encodeToString(sg)
+        println(json)
+        val des: Pound = Json.decodeFromString(json)
+        println(des.display(2))
+    }
     /*
     @Test
     fun getBase() {

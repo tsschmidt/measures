@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalJsExport::class)
+@file:OptIn(ExperimentalJsExport::class, ExperimentalSerializationApi::class)
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -6,6 +6,7 @@ import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import kotlin.js.JsName
 import WeightType.*
+import kotlinx.serialization.ExperimentalSerializationApi
 
 /**
  * Enum used to designate the unit of [Weight] being represented with functions for creating and converting.
@@ -15,27 +16,36 @@ import WeightType.*
  * @param fromBase - Function that returns the [Weight] value in the configured units from the base unit.
  */
 @JsExport
-enum class WeightType(
+@Serializable
+sealed class WeightType(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double,
+    override val fromBase: (Double) -> Double
 ) : MeasureType<Weight> {
-    KILOGRAM("kg", kgToLb, lbToKg) {
+
+    @Serializable
+    data object KILOGRAM : WeightType("kg", kgToLb, lbToKg) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Kilogram(v) as T
-    },
-    GRAM("g", gToLb, lbToG) {
+    }
+
+    @Serializable
+    data object GRAM : WeightType("g", gToLb, lbToG) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Gram(v) as T
-    },
-    POUND("lb", identity, identity) {
+    }
+
+    @Serializable
+    data object POUND : WeightType("lb", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Pound(v) as T
-    },
-    OUNCE("oz", ozToLb, lbToOz){
+    }
+
+    @Serializable
+    data object OUNCE : WeightType("oz", ozToLb, lbToOz) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double) = Ounce(v) as T
-    };
+    }
 }
 
 /**
@@ -44,7 +54,7 @@ enum class WeightType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Weight(override val type: MeasureType<Weight>): Amount(), Comparable<Weight> {
+sealed class Weight : Amount(), Comparable<Weight> {
 
     /* Properties used to access this Weight's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
@@ -109,7 +119,9 @@ sealed class Weight(override val type: MeasureType<Weight>): Amount(), Comparabl
 @Serializable
 @SerialName("kilogram")
 @JsExport
-class Kilogram(override val value: Double = 0.0) : Weight(KILOGRAM)
+class Kilogram(override val value: Double = 0.0) : Weight() {
+    override val type = KILOGRAM
+}
 
 /**
  * Class that represents a [Weight] in Grams.
@@ -119,7 +131,9 @@ class Kilogram(override val value: Double = 0.0) : Weight(KILOGRAM)
 @Serializable
 @SerialName("gram")
 @JsExport
-class Gram(override val value: Double = 0.0) : Weight(GRAM)
+class Gram(override val value: Double = 0.0) : Weight() {
+    override val type = GRAM
+}
 
 /**
  * Class that represents a [Weight] in pounds.
@@ -129,7 +143,9 @@ class Gram(override val value: Double = 0.0) : Weight(GRAM)
 @Serializable
 @SerialName("pound")
 @JsExport
-class Pound(override val value: Double = 0.0) : Weight(POUND)
+class Pound(override val value: Double = 0.0) : Weight() {
+    override val type = POUND
+}
 
 /**
  * Class that represents a [Weight] in ounces.
@@ -139,7 +155,9 @@ class Pound(override val value: Double = 0.0) : Weight(POUND)
 @Serializable
 @SerialName("ounce")
 @JsExport
-class Ounce(override val value: Double = 0.0): Weight(OUNCE)
+class Ounce(override val value: Double = 0.0): Weight() {
+    override val type = OUNCE
+}
 
 /* Constants used for converting from base unit(pounds) to other units */
 const val POUND_KILOGRAM = 0.453592

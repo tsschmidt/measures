@@ -15,36 +15,51 @@ import LengthType.*
  * @param fromBase - Function that returns the [Length] value in the configured units from the base unit.
  */
 @JsExport
-enum class LengthType(
+@Serializable
+sealed class LengthType(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double
 ) : MeasureType<Length> {
-    INCH("in", inToCm, cmToIn) {
+
+    @Serializable
+    object INCH : LengthType("in", inToCm, cmToIn) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Inch(v) as T
-                               },
-    CM("cm", identity, identity) {
+    }
+
+    @Serializable
+    object CM : LengthType("cm", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Centimeter(v) as T
-                                 },
-    METER("m", mToCm, cmToM) {
+    }
+
+    @Serializable
+    object METER : LengthType("m", mToCm, cmToM) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Meter(v) as T
-                             },
-    FOOT("ft", ftToCm, cmToFt) {
+    }
+
+    @Serializable
+    object FOOT : LengthType("ft", ftToCm, cmToFt) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Foot(v) as T
-                               },
-    KILOMETER("km", kmToCm, cmToKm) {
+    }
+
+    @Serializable
+    object KILOMETER : LengthType("km", kmToCm, cmToKm) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Kilometer(v) as T
-                                    },
-    MILE("mil", milToCm, cmToMil) {
+    }
+
+    @Serializable
+    object MILE : LengthType("mil", milToCm, cmToMil) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Mile(v) as T
-                                  },
-    YARD("yd", ydToCm, cmToYd){
+    }
+
+    @Serializable
+    object YARD : LengthType("yd", ydToCm, cmToYd){
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Yard(v) as T
     }
@@ -56,7 +71,7 @@ enum class LengthType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Length(override val type: MeasureType<Length>) : BaseMeasure(), Comparable<Length> {
+sealed class Length : BaseMeasure(), Comparable<Length> {
     /* Properties used to access this Gravity's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val inches by lazy { INCH.fromBase(base) }
@@ -116,7 +131,9 @@ sealed class Length(override val type: MeasureType<Length>) : BaseMeasure(), Com
 @Serializable
 @SerialName("inch")
 @JsExport
-class Inch(override val value: Double = 0.0) : Length(INCH)
+class Inch(override val value: Double = 0.0) : Length() {
+    override val type = INCH
+}
 
 /**
  * Class representing [Length] in centimeters.
@@ -124,7 +141,9 @@ class Inch(override val value: Double = 0.0) : Length(INCH)
 @Serializable
 @SerialName("centimeter")
 @JsExport
-class Centimeter(override val value: Double = 0.0) : Length(CM)
+class Centimeter(override val value: Double = 0.0) : Length() {
+    override val type = CM
+}
 
 /**
  * Class representing [Length] in meters.
@@ -132,7 +151,9 @@ class Centimeter(override val value: Double = 0.0) : Length(CM)
 @Serializable
 @SerialName("meter")
 @JsExport
-class Meter(override val value: Double = 0.0) : Length(METER)
+class Meter(override val value: Double = 0.0) : Length() {
+    override val type = METER
+}
 
 /**
  * Class representing [Length] in feet.
@@ -140,7 +161,9 @@ class Meter(override val value: Double = 0.0) : Length(METER)
 @Serializable
 @SerialName("inch")
 @JsExport
-class Foot(override val value: Double = 0.0) : Length(FOOT)
+class Foot(override val value: Double = 0.0) : Length() {
+    override val type = FOOT
+}
 
 /**
  * Class representing [Length] in kilometers.
@@ -148,7 +171,9 @@ class Foot(override val value: Double = 0.0) : Length(FOOT)
 @Serializable
 @SerialName("kilometer")
 @JsExport
-class Kilometer(override val value: Double = 0.0) : Length(KILOMETER)
+class Kilometer(override val value: Double = 0.0) : Length() {
+    override val type = KILOMETER
+}
 
 /**
  * Class representing [Length] in miles.
@@ -156,7 +181,9 @@ class Kilometer(override val value: Double = 0.0) : Length(KILOMETER)
 @Serializable
 @SerialName("mile")
 @JsExport
-class Mile(override val value: Double = 0.0) : Length(MILE)
+class Mile(override val value: Double = 0.0) : Length() {
+    override val type = MILE
+}
 
 /**
  * Class representing [Length] in yards.
@@ -164,7 +191,9 @@ class Mile(override val value: Double = 0.0) : Length(MILE)
 @Serializable
 @SerialName("yard")
 @JsExport
-class Yard(override val value: Double = 0.0) : Length(YARD)
+class Yard(override val value: Double = 0.0) : Length() {
+    override val type = YARD
+}
 
 /** Constants used to convert [Length] values to base units */
 const val CM_INCH = 2.54

@@ -8,16 +8,21 @@ import kotlin.js.JsName
 import TemperatureType.*
 
 @JsExport
-enum class TemperatureType(
+@Serializable
+sealed class TemperatureType(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double
 ) : MeasureType<Temperature> {
-    FAHRENHEIT("\u00B0F", identity, identity) {
+
+    @Serializable
+    object FAHRENHEIT : TemperatureType("\u00B0F", identity, identity) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Fahrenheit(v) as T
-    },
-    CELSIUS("\u00B0C", ctoF, fToC) {
+    }
+
+    @Serializable
+    object CELSIUS : TemperatureType("\u00B0C", ctoF, fToC) {
         @Suppress("UNCHECKED_CAST")
         override fun <T> create(v: Double): T = Celsius(v) as T
     }
@@ -28,7 +33,7 @@ enum class TemperatureType(
  */
 @Serializable
 @JsExport
-sealed class Temperature(override val type: MeasureType<Temperature>) : BaseMeasure(), Comparable<Temperature> {
+sealed class Temperature : BaseMeasure(), Comparable<Temperature> {
     /* Properties used to access this Temperature's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val fahrenheit by lazy { FAHRENHEIT.fromBase(base) }
@@ -88,7 +93,9 @@ sealed class Temperature(override val type: MeasureType<Temperature>) : BaseMeas
 @Serializable
 @SerialName("fahrenheit")
 @JsExport
-class Fahrenheit(override val value: Double = 0.0) : Temperature(FAHRENHEIT)
+class Fahrenheit(override val value: Double = 0.0) : Temperature() {
+    override val type = FAHRENHEIT
+}
 
 /**
  * Class representing [Temperature] in Celsius.
@@ -96,7 +103,9 @@ class Fahrenheit(override val value: Double = 0.0) : Temperature(FAHRENHEIT)
 @Serializable
 @SerialName("celsius")
 @JsExport
-class Celsius(override val value: Double = 0.0) : Temperature(CELSIUS)
+class Celsius(override val value: Double = 0.0) : Temperature() {
+    override val type = CELSIUS
+}
 
 /** Functions for converting [Temperature] values form base units to other units. */
 val ctoF = { v: Double -> (v * 9.0 / 5.0) + 32.0 }
