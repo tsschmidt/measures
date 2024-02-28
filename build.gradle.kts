@@ -26,8 +26,9 @@ kotlin {
         }
     }
     js(IR) {
+        // moduleName = "measures"
         browser {
-            useCommonJs()
+            useEsModules()
             commonWebpackConfig {
                 cssSupport {
                     enabled.set(true)

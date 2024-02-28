@@ -6,7 +6,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
-import kotlin.js.JsName
 import com.tsschmi.measures.VolumeType.*
 
 @JsExport
@@ -15,61 +14,33 @@ sealed class VolumeType(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double
-) : MeasureType<Volume> {
+) : MeasureType {
+    @Serializable
+    data object LiterType : VolumeType("l", lToQt, qtToL)
 
     @Serializable
-    data object LiterType : VolumeType("l", lToQt, qtToL){
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Liter(v) as T
-    }
+    data object MilliliterType : VolumeType("ml", mlToQt, qtToMl)
 
     @Serializable
-    data object MilliliterType : VolumeType("ml", mlToQt, qtToMl){
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Milliliter(v) as T
-    }
+    data object GallonType : VolumeType("gal", galToQt, qtToGal)
 
     @Serializable
-    data object GallonType : VolumeType("gal", galToQt, qtToGal) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Liter(v) as T
-    }
+    data object QuartType : VolumeType("qt", identity, identity)
 
     @Serializable
-    data object QuartType : VolumeType("qt", identity, identity) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Quart(v) as T
-    }
+    data object PintType : VolumeType("pt", pToQt, qtToP)
 
     @Serializable
-    data object PintType : VolumeType("pt", pToQt, qtToP) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Pint(v) as T
-    }
+    data object CupType : VolumeType("c", cToQt, qtToC)
 
     @Serializable
-    data object CupType : VolumeType("c", cToQt, qtToC) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Cup(v) as T
-    }
+    data object TablespoonType : VolumeType("tbsp", tbspToQt, qtToTbsp)
 
     @Serializable
-    data object TablespoonType : VolumeType("tbsp", tbspToQt, qtToTbsp) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Tablespoon(v) as T
-    }
+    data object TeaspoonType: VolumeType("tsp", tspToQt, qtToTsp)
 
     @Serializable
-    data object TeaspoonType: VolumeType("tsp", tspToQt, qtToTsp){
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Teaspoon(v) as T
-    }
-
-    @Serializable
-    data object FluidOunceType: VolumeType("fl. oz", flozToQt, qtToFloz){
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = FluidOunce(v) as T
-    }
+    data object FluidOunceType: VolumeType("fl. oz", flozToQt, qtToFloz)
 }
 
 /**
@@ -78,7 +49,7 @@ sealed class VolumeType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Volume : Amount(), Comparable<Volume> {
+sealed class Volume : Measure, Amount, Comparable<Volume> {
     /** Properties used to access this Volume's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val liter by lazy { LiterType.fromBase(base) }
@@ -96,42 +67,6 @@ sealed class Volume : Amount(), Comparable<Volume> {
     override fun hashCode() = Volume::class.hashCode() * 31 + base.hashCode()
 
     override fun compareTo(other: Volume): Int = base.compareTo(other.base)
-
-    operator fun <T : Volume> plus(o: Volume) : T = type.create(type.fromBase(base + o.base))
-
-    operator fun <T : Volume> minus(o: Volume): T = type.create(type.fromBase(base - o.base))
-
-    operator fun <T : Volume> times(o: Volume): T = type.create(type.fromBase(base * o.base))
-
-    operator fun <T : Volume> div(o: Volume): T = type.create(type.fromBase(base / o.base))
-
-    operator fun <T : Volume> rem(o: Volume): T = type.create(type.fromBase(base % o.base))
-
-    operator fun <T : Volume> unaryPlus(): T = type.create(-value)
-
-    operator fun <T : Volume> unaryMinus(): T = type.create(+value)
-
-    operator fun <T : Volume> inc(): T = type.create(value + 1.0)
-
-    operator fun <T : Volume> dec(): T = type.create(value - 1.0)
-
-    @JsName("plusDouble")
-    operator fun <T : Volume> plus(v: Double): T = type.create(value + v)
-
-    @JsName("minusDouble")
-    operator fun <T : Volume> minus(v: Double): T = type.create(value - v)
-
-    @JsName("timesDouble")
-    operator fun <T : Volume> times(v: Double): T = type.create(value * v)
-
-    @JsName("divDouble")
-    operator fun <T : Volume> div(v: Double): T = type.create(value / v)
-
-    @JsName("remDouble")
-    operator fun <T : Volume> rem(v: Double): T = type.create(value % v)
-
-    @JsName("convert")
-    operator fun <T : Volume> invoke(type: VolumeType): T = type.create(type.fromBase(base))
 }
 
 /**
@@ -140,8 +75,9 @@ sealed class Volume : Amount(), Comparable<Volume> {
 @Serializable
 @SerialName("liter")
 @JsExport
-class Liter(override val value: Double = 0.0) : Volume() {
-    override val type = LiterType
+class Liter(override val value: Double = 0.0) : Volume(), MeasureOperators<Liter, Volume> {
+    override val type: MeasureType = LiterType
+    override fun create(v: Double) = Liter(v)
 }
 
 /**
@@ -150,8 +86,10 @@ class Liter(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("ml")
 @JsExport
-class Milliliter(override val value: Double = 0.0) : Volume() {
-    override val type = MilliliterType
+class Milliliter(override val value: Double = 0.0) : Volume(), MeasureOperators<Milliliter, Volume> {
+    override val type: MeasureType = MilliliterType
+    override fun create(v: Double) = Milliliter(v)
+
 }
 
 /**
@@ -160,8 +98,9 @@ class Milliliter(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("gallon")
 @JsExport
-class Gallon(override val value: Double = 0.0) : Volume() {
-    override val type = GallonType
+class Gallon(override val value: Double = 0.0) : Volume(), MeasureOperators<Gallon, Volume> {
+    override val type: MeasureType = GallonType
+    override fun create(v: Double) = Gallon(v)
 }
 
 /**
@@ -170,8 +109,9 @@ class Gallon(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("quart")
 @JsExport
-class Quart(override val value: Double = 0.0) : Volume() {
-    override val type = QuartType
+class Quart(override val value: Double = 0.0) : Volume(), MeasureOperators<Quart, Volume> {
+    override val type: MeasureType = QuartType
+    override fun create(v: Double) = Quart(v)
 }
 
 /**
@@ -180,8 +120,9 @@ class Quart(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("pint")
 @JsExport
-class Pint(override val value: Double = 0.0) : Volume() {
-    override val type = PintType
+class Pint(override val value: Double = 0.0) : Volume(), MeasureOperators<Pint, Volume> {
+    override val type: MeasureType = PintType
+    override fun create(v: Double) = Pint(v)
 }
 
 /**
@@ -190,8 +131,9 @@ class Pint(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("cup")
 @JsExport
-class Cup(override val value: Double = 0.0) : Volume() {
-    override val type = CupType
+class Cup(override val value: Double = 0.0) : Volume(), MeasureOperators<Cup, Volume> {
+    override val type: MeasureType = CupType
+    override fun create(v: Double) = Cup(v)
 }
 
 /**
@@ -200,8 +142,9 @@ class Cup(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("tablespoon")
 @JsExport
-class Tablespoon(override val value: Double = 0.0) : Volume() {
-    override val type = TablespoonType
+class Tablespoon(override val value: Double = 0.0) : Volume(), MeasureOperators<Tablespoon, Volume> {
+    override val type: MeasureType = TablespoonType
+    override fun create(v: Double) = Tablespoon(v)
 }
 
 /**
@@ -210,8 +153,9 @@ class Tablespoon(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("teaspoon")
 @JsExport
-class Teaspoon(override val value: Double = 0.0) : Volume() {
-    override val type = TeaspoonType
+class Teaspoon(override val value: Double = 0.0) : Volume(), MeasureOperators<Teaspoon, Volume> {
+    override val type: MeasureType = TeaspoonType
+    override fun create(v: Double) = Teaspoon(v)
 }
 
 /**
@@ -220,8 +164,9 @@ class Teaspoon(override val value: Double = 0.0) : Volume() {
 @Serializable
 @SerialName("fl_ounce")
 @JsExport
-class FluidOunce(override val value: Double = 0.0) : Volume() {
-    override val type = FluidOunceType
+class FluidOunce(override val value: Double = 0.0) : Volume(), MeasureOperators<FluidOunce, Volume> {
+    override val type: MeasureType = FluidOunceType
+    override fun create(v: Double) = FluidOunce(v)
 }
 
 /** Constants used in converting [Volume] values to and from base units */

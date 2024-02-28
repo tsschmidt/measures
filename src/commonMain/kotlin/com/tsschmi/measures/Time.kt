@@ -6,7 +6,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
-import kotlin.js.JsName
 import com.tsschmi.measures.TimeType.*
 
 /**
@@ -22,49 +21,27 @@ sealed class TimeType(
     override val units: String,
     override val toBase : (Double) -> Double,
     override val fromBase : (Double) -> Double
-) : MeasureType<Time> {
+) : MeasureType {
+    @Serializable
+    data object SecondType : TimeType("sec", identity, identity)
 
     @Serializable
-    data object SecondType : TimeType("sec", identity, identity) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Second(v) as T
-    }
+    data object MinuteType : TimeType("min", mToS, sToM)
 
     @Serializable
-    data object MinuteType : TimeType("min", mToS, sToM) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Minute(v) as T
-    }
+    data object HourType : TimeType("hrs", hToS, sToH)
 
     @Serializable
-    data object HourType : TimeType("hrs", hToS, sToH) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Hour(v) as T
-    }
+    data object DayType : TimeType("dys", dayToS, sToDay)
 
     @Serializable
-    data object DayType : TimeType("dys", dayToS, sToDay) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Day(v) as T
-    }
+    data object WeekType : TimeType("wks", wkToS, sToWk)
 
     @Serializable
-    data object WeekType : TimeType("wks", wkToS, sToWk) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Week(v) as T
-    }
+    data object MonthType : TimeType("mos", mthToS, sToMth)
 
     @Serializable
-    data object MonthType : TimeType("mos", mthToS, sToMth) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Month(v) as T
-    }
-
-    @Serializable
-    data object YearType : TimeType("yrs", yrToS, sToYr) {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T> create(v: Double): T = Year(v) as T
-    }
+    data object YearType : TimeType("yrs", yrToS, sToYr)
 }
 
 /**
@@ -73,7 +50,7 @@ sealed class TimeType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Time : BaseMeasure(), Comparable<Time> {
+sealed class Time : Measure, Comparable<Time> {
     /* Properties used to access this Time's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val seconds by lazy { SecondType.fromBase(base) }
@@ -89,42 +66,6 @@ sealed class Time : BaseMeasure(), Comparable<Time> {
     override fun equals(other: Any?) = other != null && other is Time && base == other.base
 
     override fun hashCode() = Time::class.hashCode() * 31 + value.hashCode()
-
-    operator fun <T : Time> plus(o: Time) : T = type.create(type.fromBase(base + o.base))
-
-    operator fun <T : Time> minus(o: Time): T = type.create(type.fromBase(base - o.base))
-
-    operator fun <T : Time> times(o: Time): T = type.create(type.fromBase(base * o.base))
-
-    operator fun <T : Time> div(o: Time): T = type.create(type.fromBase(base / o.base))
-
-    operator fun <T : Time> rem(o: Time): T = type.create(type.fromBase(base % o.base))
-
-    operator fun <T : Time> unaryPlus(): T = type.create(-value)
-
-    operator fun <T : Time> unaryMinus(): T = type.create(+value)
-
-    operator fun <T : Time> inc(): T = type.create(value + 1.0)
-
-    operator fun <T : Time> dec(): T = type.create(value - 1.0)
-
-    @JsName("plusDouble")
-    operator fun <T : Time> plus(v: Double): T = type.create(value + v)
-
-    @JsName("minusDouble")
-    operator fun <T : Time> minus(v: Double): T = type.create(value - v)
-
-    @JsName("timesDouble")
-    operator fun <T : Time> times(v: Double): T = type.create(value * v)
-
-    @JsName("divDouble")
-    operator fun <T : Time> div(v: Double): T = type.create(value / v)
-
-    @JsName("remDouble")
-    operator fun <T : Time> rem(v: Double): T = type.create(value % v)
-
-    @JsName("convert")
-    operator fun <T : Time> invoke(type: TimeType): T = type.create(type.fromBase(base))
 }
 
 /**
@@ -133,8 +74,10 @@ sealed class Time : BaseMeasure(), Comparable<Time> {
 @Serializable
 @SerialName("second")
 @JsExport
-class Second(override val value: Double = 0.0) : Time() {
-    override val type = SecondType
+class Second(override val value: Double = 0.0) : Time(), MeasureOperators<Second, Time> {
+    override val type: MeasureType = SecondType
+    override fun create(v: Double) = Second(v)
+
 }
 
 /**
@@ -143,8 +86,9 @@ class Second(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("minute")
 @JsExport
-class Minute(override val value: Double = 0.0) : Time() {
-    override val type = MinuteType
+class Minute(override val value: Double = 0.0) : Time(), MeasureOperators<Minute, Time> {
+    override val type: MeasureType = MinuteType
+    override fun create(v: Double) = Minute(v)
 }
 
 /**
@@ -153,8 +97,9 @@ class Minute(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("hour")
 @JsExport
-class Hour(override val value: Double = 0.0) : Time() {
-    override val type = HourType
+class Hour(override val value: Double = 0.0) : Time(), MeasureOperators<Hour, Time> {
+    override val type: MeasureType = HourType
+    override fun create(v: Double) = Hour(v)
 }
 
 /**
@@ -163,8 +108,9 @@ class Hour(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("day")
 @JsExport
-class Day(override val value: Double = 0.0) : Time() {
-    override val type = DayType
+class Day(override val value: Double = 0.0) : Time(), MeasureOperators<Day, Time> {
+    override val type: MeasureType = DayType
+    override fun create(v: Double) = Day(v)
 }
 
 
@@ -174,8 +120,9 @@ class Day(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("week")
 @JsExport
-class Week(override val value: Double = 0.0) : Time() {
-    override val type = WeekType
+class Week(override val value: Double = 0.0) : Time(), MeasureOperators<Week, Time> {
+    override val type: MeasureType = WeekType
+    override fun create(v: Double) = Week(v)
 }
 
 /**
@@ -184,8 +131,9 @@ class Week(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("month")
 @JsExport
-class Month(override val value: Double = 0.0) : Time() {
-    override val type = MonthType
+class Month(override val value: Double = 0.0) : Time(), MeasureOperators<Month, Time> {
+    override val type: MeasureType = MonthType
+    override fun create(v: Double) = Month(v)
 }
 
 /**
@@ -194,8 +142,9 @@ class Month(override val value: Double = 0.0) : Time() {
 @Serializable
 @SerialName("year")
 @JsExport
-class Year(override val value: Double = 0.0) : Time() {
-    override val type = YearType
+class Year(override val value: Double = 0.0) : Time(), MeasureOperators<Year, Time> {
+    override val type: MeasureType = YearType
+    override fun create(v: Double) = Year(v)
 }
 
 /** Constants for converting [Time] values to and from base units */
