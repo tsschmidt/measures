@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import com.tsschmi.measures.LengthType.*
+import kotlin.js.JsName
 
 /**
  * Enum implementing [MeasureType] to provide units of [Length] being represented with functions for creating and converting.
@@ -17,31 +18,32 @@ import com.tsschmi.measures.LengthType.*
  */
 @JsExport
 @Serializable
-sealed class LengthType(
+sealed class LengthType<out T : Length>(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double
-) : MeasureType{
+    override val fromBase: (Double) -> Double,
+    override val create: (Double) -> T
+) : MeasureType<T>{
     @Serializable
-    data object InchType : LengthType("in", inToCm, cmToIn)
+    data object InchType : LengthType<Inch>("in", inToCm, cmToIn, ::Inch)
 
     @Serializable
-    data object CentimeterType : LengthType("cm", identity, identity)
+    data object CentimeterType : LengthType<Centimeter>("cm", identity, identity, ::Centimeter)
 
     @Serializable
-    data object MeterType : LengthType("m", mToCm, cmToM)
+    data object MeterType : LengthType<Meter>("m", mToCm, cmToM, ::Meter)
 
     @Serializable
-    data object FootType : LengthType("ft", ftToCm, cmToFt)
+    data object FootType : LengthType<Foot>("ft", ftToCm, cmToFt, ::Foot)
 
     @Serializable
-    data object KilometerType : LengthType("km", kmToCm, cmToKm)
+    data object KilometerType : LengthType<Kilometer>("km", kmToCm, cmToKm, ::Kilometer)
 
     @Serializable
-    data object MileType : LengthType("mil", milToCm, cmToMil)
+    data object MileType : LengthType<Mile>("mil", milToCm, cmToMil, ::Mile)
 
     @Serializable
-    data object YardType : LengthType("yd", ydToCm, cmToYd)
+    data object YardType : LengthType<Yard>("yd", ydToCm, cmToYd, ::Yard)
 }
 
 /**
@@ -50,7 +52,7 @@ sealed class LengthType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Length : Measure, Comparable<Length> {
+sealed class Length : Measure, Operators<Length>, Comparable<Length> {
     /* Properties used to access this Gravity's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val inches by lazy { InchType.fromBase(base) }
@@ -66,6 +68,9 @@ sealed class Length : Measure, Comparable<Length> {
     override fun hashCode(): Int = Length::class.hashCode() * 31 + base.hashCode()
 
     override fun compareTo(other: Length): Int = base.compareTo(other.base)
+
+    @JsName("Create")
+    operator fun <T : Length> invoke(l : LengthType<T>) = l.create(l.fromBase(base))
 }
 
 /**
@@ -75,8 +80,7 @@ sealed class Length : Measure, Comparable<Length> {
 @SerialName("inch")
 @JsExport
 class Inch(override val value: Double = 0.0) : Length(), MeasureOperators<Inch, Length> {
-    override val type: MeasureType = InchType
-    override fun create(v: Double) = Inch(v)
+    override val type = InchType
 
 }
 
@@ -87,8 +91,7 @@ class Inch(override val value: Double = 0.0) : Length(), MeasureOperators<Inch, 
 @SerialName("centimeter")
 @JsExport
 class Centimeter(override val value: Double = 0.0) : Length(), MeasureOperators<Centimeter, Length> {
-    override val type: MeasureType = CentimeterType
-    override fun create(v: Double) = Centimeter(v)
+    override val type = CentimeterType
 }
 
 /**
@@ -98,8 +101,7 @@ class Centimeter(override val value: Double = 0.0) : Length(), MeasureOperators<
 @SerialName("meter")
 @JsExport
 class Meter(override val value: Double = 0.0) : Length(), MeasureOperators<Meter, Length> {
-    override val type: MeasureType = MeterType
-    override fun create(v: Double) = Meter(v)
+    override val type = MeterType
 }
 
 /**
@@ -109,8 +111,7 @@ class Meter(override val value: Double = 0.0) : Length(), MeasureOperators<Meter
 @SerialName("inch")
 @JsExport
 class Foot(override val value: Double = 0.0) : Length(), MeasureOperators<Foot, Length> {
-    override val type: MeasureType = FootType
-    override fun create(v: Double) = Foot(v)
+    override val type = FootType
 }
 
 /**
@@ -120,9 +121,7 @@ class Foot(override val value: Double = 0.0) : Length(), MeasureOperators<Foot, 
 @SerialName("kilometer")
 @JsExport
 class Kilometer(override val value: Double = 0.0) : Length(), MeasureOperators<Kilometer, Length> {
-    override val type: MeasureType = KilometerType
-    override fun create(v: Double) = Kilometer(v)
-
+    override val type = KilometerType
 }
 
 /**
@@ -132,9 +131,7 @@ class Kilometer(override val value: Double = 0.0) : Length(), MeasureOperators<K
 @SerialName("mile")
 @JsExport
 class Mile(override val value: Double = 0.0) : Length(), MeasureOperators<Mile, Length> {
-    override val type: MeasureType = MileType
-    override fun create(v: Double) = Mile(v)
-
+    override val type = MileType
 }
 
 /**
@@ -144,8 +141,7 @@ class Mile(override val value: Double = 0.0) : Length(), MeasureOperators<Mile, 
 @SerialName("yard")
 @JsExport
 class Yard(override val value: Double = 0.0) : Length(), MeasureOperators<Yard, Length> {
-    override val type: MeasureType = YardType
-    override fun create(v: Double) = Yard(v)
+    override val type = YardType
 }
 
 /** Constants used to convert [Length] values to base units */

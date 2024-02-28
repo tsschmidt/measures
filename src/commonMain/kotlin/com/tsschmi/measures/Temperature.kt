@@ -7,19 +7,21 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import com.tsschmi.measures.TemperatureType.*
+import kotlin.js.JsName
 
 @JsExport
 @Serializable
-sealed class TemperatureType(
+sealed class TemperatureType<out T : Temperature>(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double
-) : MeasureType {
+    override val fromBase: (Double) -> Double,
+    override val create: (Double) -> T
+) : MeasureType<T> {
     @Serializable
-    data object FahrenheitType : TemperatureType("\u00B0F", identity, identity)
+    data object FahrenheitType : TemperatureType<Fahrenheit>("\u00B0F", identity, identity, ::Fahrenheit)
 
     @Serializable
-    data object CelsiusType : TemperatureType("\u00B0C", ctoF, fToC)
+    data object CelsiusType : TemperatureType<Celsius>("\u00B0C", ctoF, fToC, ::Celsius)
 }
 
 /**
@@ -28,7 +30,7 @@ sealed class TemperatureType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Temperature : Measure, Comparable<Temperature> {
+sealed class Temperature : Measure, Operators<Temperature>, Comparable<Temperature> {
     /* Properties used to access this Temperature's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val fahrenheit by lazy { FahrenheitType.fromBase(base) }
@@ -39,6 +41,9 @@ sealed class Temperature : Measure, Comparable<Temperature> {
     override fun equals(other: Any?) = other != null && other is Temperature && base == other.base
 
     override fun hashCode(): Int = Temperature::class.hashCode() * 31 + base.hashCode()
+
+    @JsName("convert")
+    operator fun <T : Temperature> invoke(t: TemperatureType<T>)  = t.create(t.fromBase(base))
 }
 
 /**
@@ -48,8 +53,7 @@ sealed class Temperature : Measure, Comparable<Temperature> {
 @SerialName("fahrenheit")
 @JsExport
 class Fahrenheit(override val value: Double = 0.0) : Temperature(), MeasureOperators<Fahrenheit, Temperature> {
-    override val type: MeasureType = FahrenheitType
-    override fun create(v: Double) = Fahrenheit(v)
+    override val type = FahrenheitType
 
 }
 
@@ -60,8 +64,7 @@ class Fahrenheit(override val value: Double = 0.0) : Temperature(), MeasureOpera
 @SerialName("celsius")
 @JsExport
 class Celsius(override val value: Double = 0.0) : Temperature(), MeasureOperators<Celsius, Temperature> {
-    override val type: MeasureType = CelsiusType
-    override fun create(v: Double) = Celsius(v)
+    override val type = CelsiusType
 
 }
 

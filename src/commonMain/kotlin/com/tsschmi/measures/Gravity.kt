@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import com.tsschmi.measures.GravityType.*
+import kotlin.js.JsName
 
 /**
  * Enum implementing [MeasureType] to provide units of [Gravity] being represented with functions for creating and converting.
@@ -17,25 +18,26 @@ import com.tsschmi.measures.GravityType.*
  */
 @JsExport
 @Serializable
-sealed class GravityType(
+sealed class GravityType<out T : Gravity>(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double
-) : MeasureType {
+    override val fromBase: (Double) -> Double,
+    override val create: (Double) -> T
+) : MeasureType<T> {
     @Serializable
-    data object GravityPointType : GravityType("ppg", identity, identity)
+    data object GravityPointType : GravityType<GravityPoint>("ppg", identity, identity, ::GravityPoint)
 
     @Serializable
-    data object SpecificGravityType : GravityType("sg", sgToGp, gpToSg)
+    data object SpecificGravityType : GravityType<SpecificGravity>("sg", sgToGp, gpToSg, ::SpecificGravity)
 
     @Serializable
-    data object BrixType : GravityType("brix", brixToGp, gpToBrix)
+    data object BrixType : GravityType<Gravity>("brix", brixToGp, gpToBrix, ::Brix)
 
     @Serializable
-    data object PlatoType : GravityType("P", platoToGp, gpToPlato)
+    data object PlatoType : GravityType<Plato>("P", platoToGp, gpToPlato, ::Plato)
 
     @Serializable
-    data object YieldType : GravityType("%", yieldToGp, gpToYield)
+    data object YieldType : GravityType<Yield>("%", yieldToGp, gpToYield, ::Yield)
 }
 
 /**
@@ -44,7 +46,7 @@ sealed class GravityType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Gravity : Measure, Comparable<Gravity> {
+sealed class Gravity : Measure, Operators<Gravity>, Comparable<Gravity> {
     /* Properties used to access this Gravity's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
     val gravityPoints by lazy { GravityPointType.fromBase(base) }
@@ -58,6 +60,9 @@ sealed class Gravity : Measure, Comparable<Gravity> {
     override fun hashCode(): Int = Gravity::class.hashCode() * 31 + base.hashCode()
 
     override fun compareTo(other: Gravity): Int = base.compareTo(other.base)
+
+    @JsName("convert")
+    operator fun <T : Gravity> invoke(g: GravityType<T>) = g.create(g.fromBase(base))
 }
 
 
@@ -68,8 +73,7 @@ sealed class Gravity : Measure, Comparable<Gravity> {
 @SerialName("gp")
 @JsExport
 class GravityPoint(override val value: Double = 0.0) : Gravity(), MeasureOperators<GravityPoint, Gravity> {
-    override val type: MeasureType = GravityPointType
-    override fun create(v: Double) = GravityPoint(v)
+    override val type= GravityPointType
 }
 
 /**
@@ -79,8 +83,7 @@ class GravityPoint(override val value: Double = 0.0) : Gravity(), MeasureOperato
 @SerialName("brix")
 @JsExport
 class Brix(override val value: Double = 0.0) : Gravity(), MeasureOperators<Brix, Gravity> {
-    override val type: MeasureType = BrixType
-    override fun create(v: Double) = Brix(v)
+    override val type = BrixType
 }
 
 /**
@@ -90,8 +93,7 @@ class Brix(override val value: Double = 0.0) : Gravity(), MeasureOperators<Brix,
 @SerialName("sg")
 @JsExport
 class SpecificGravity(override val value: Double = 0.0) : Gravity(), MeasureOperators<SpecificGravity, Gravity> {
-    override val type: MeasureType = SpecificGravityType
-    override fun create(v: Double) = SpecificGravity(v)
+    override val type = SpecificGravityType
 
     /**
      * Overridden toString method to display specific gravity to 4 digits significance.
@@ -106,8 +108,7 @@ class SpecificGravity(override val value: Double = 0.0) : Gravity(), MeasureOper
 @SerialName("plato")
 @JsExport
 class Plato(override val value: Double = 0.0) : Gravity(), MeasureOperators<Plato, Gravity> {
-    override val type: MeasureType = PlatoType
-    override fun create(v: Double) = Plato(v)
+    override val type = PlatoType
 }
 
 /**
@@ -117,8 +118,7 @@ class Plato(override val value: Double = 0.0) : Gravity(), MeasureOperators<Plat
 @SerialName("yield")
 @JsExport
 class Yield(override val value: Double = 0.0) : Gravity(), MeasureOperators<Yield, Gravity> {
-    override val type: MeasureType = YieldType
-    override fun create(v: Double) = Yield(v)
+    override val type = YieldType
 }
 
 /** Functions to convert [Gravity] values from base unit to other units */

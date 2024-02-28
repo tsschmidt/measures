@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import com.tsschmi.measures.WeightType.*
+import kotlin.js.JsName
 
 /**
  * Enum used to designate the unit of [Weight] being represented with functions for creating and converting.
@@ -17,22 +18,23 @@ import com.tsschmi.measures.WeightType.*
  */
 @JsExport
 @Serializable
-sealed class WeightType(
+sealed class WeightType<out T : Weight>(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double
-): MeasureType {
+    override val fromBase: (Double) -> Double,
+    override val create: (Double) -> T
+): MeasureType<T> {
     @Serializable
-    data object KilogramType : WeightType("kg", kgToLb, lbToKg)
+    data object KilogramType : WeightType<Kilogram>("kg", kgToLb, lbToKg, ::Kilogram)
 
     @Serializable
-    data object GramType : WeightType("g", gToLb, lbToG)
+    data object GramType : WeightType<Gram>("g", gToLb, lbToG, ::Gram)
 
     @Serializable
-    data object PoundType : WeightType("lb", identity, identity)
+    data object PoundType : WeightType<Pound>("lb", identity, identity, ::Pound)
 
     @Serializable
-    data object OunceType : WeightType("oz", ozToLb, lbToOz)
+    data object OunceType : WeightType<Ounce>("oz", ozToLb, lbToOz, ::Ounce)
 }
 
 /**
@@ -41,7 +43,7 @@ sealed class WeightType(
 @Serializable
 @JsExport
 @Suppress("UNUSED")
-sealed class Weight : Measure, Amount, Comparable<Weight> {
+sealed class Weight : Measure, Amount, Operators<Weight>, Comparable<Weight> {
 
     /* Properties used to access this Weight's value in all available units.  Initialized lazily on first access. */
     override val base by lazy { type.toBase(value) }
@@ -50,19 +52,14 @@ sealed class Weight : Measure, Amount, Comparable<Weight> {
     val pound by lazy { PoundType.fromBase(base) }
     val ounce by lazy { OunceType.fromBase(base) }
 
-    /**
-     * Default toString to display value with 2 significant digits without units.
-     */
-    //override fun toString() = format(2)
-
     override fun equals(other: Any?) = other != null && other is Weight && base == other.base
 
-    override fun hashCode() =  Weight::class.hashCode() * 31 + base.hashCode()
+    override fun hashCode() = Weight::class.hashCode() * 31 + base.hashCode()
 
     override fun compareTo(other: Weight): Int = base.compareTo(other.base)
 
-    //@JsName("convert")
-    //operator fun <T: Weight> invoke(type: WeightType): T = create(type.fromBase(base))
+    @JsName("convert")
+    operator fun <T : Weight> invoke(w: WeightType<T>) = w.create(w.fromBase(base))
 }
 
 /**
@@ -74,21 +71,19 @@ sealed class Weight : Measure, Amount, Comparable<Weight> {
 @SerialName("kilogram")
 @JsExport
 class Kilogram(override val value: Double = 0.0) : Weight(), MeasureOperators<Kilogram, Weight> {
-    override val type: MeasureType = KilogramType
-    override fun create(v: Double) = Kilogram(v)
+    override val type = KilogramType
 }
-
 /**
  * Class that represents a [Weight] in Grams.
  *
  * @param value - Double value for a [Weight] in units of grams
  */
+
 @Serializable
 @SerialName("gram")
 @JsExport
 class Gram(override val value: Double = 0.0) : Weight(), MeasureOperators<Gram, Weight> {
-    override val type: MeasureType = GramType
-    override fun create(v: Double) = Gram(v)
+    override val type = GramType
 }
 
 /**
@@ -100,8 +95,7 @@ class Gram(override val value: Double = 0.0) : Weight(), MeasureOperators<Gram, 
 @SerialName("pound")
 @JsExport
 class Pound(override val value: Double = 0.0) : Weight(), MeasureOperators<Pound, Weight> {
-    override val type: MeasureType = KilogramType
-    override fun create(v: Double) = Pound(v)
+    override val type = KilogramType
 }
 
 /**
@@ -112,9 +106,8 @@ class Pound(override val value: Double = 0.0) : Weight(), MeasureOperators<Pound
 @Serializable
 @SerialName("ounce")
 @JsExport
-class Ounce(override val value: Double = 0.0): Weight(), MeasureOperators<Ounce, Weight> {
-    override val type: MeasureType = OunceType
-    override fun create(v: Double) = Ounce(v)
+class Ounce(override val value: Double = 0.0) : Weight(), MeasureOperators<Ounce, Weight> {
+    override val type = OunceType
 }
 
 /* Constants used for converting from base unit(pounds) to other units */

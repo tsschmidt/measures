@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
+import kotlin.js.JsName
 
 /**
  * Enum implementing [MeasureType] to provide units of [Dilution] being represented with functions for creating and converting.
@@ -16,13 +17,14 @@ import kotlin.js.JsExport
  */
 @JsExport
 @Serializable
-sealed class DilutionType(
+sealed class DilutionType<out T : Dilution>(
     override val units: String,
     override val toBase: (Double) -> Double,
-    override val fromBase: (Double) -> Double
-) : MeasureType {
+    override val fromBase: (Double) -> Double,
+    override val create: (Double) -> T
+) : MeasureType<T> {
     @Serializable
-    data object PartsPerMillionType : DilutionType("ppm", identity, identity)
+    data object PartsPerMillionType : DilutionType<PartsPerMillion>("ppm", identity, identity, ::PartsPerMillion)
 }
 
 /**
@@ -30,8 +32,7 @@ sealed class DilutionType(
  */
 @Serializable
 @JsExport
-sealed class Dilution : Measure, Comparable<Dilution> {
-    //abstract fun <T : Dilution> create(value: Double): T = PPM(value) as T
+sealed class Dilution : Measure, Operators<Dilution>, Comparable<Dilution> {
     override val base by lazy { type.toBase(value) }
 
     override fun equals(other: Any?) = other != null && other is Dilution && base == other.base
@@ -39,6 +40,9 @@ sealed class Dilution : Measure, Comparable<Dilution> {
     override fun hashCode(): Int = Dilution::class.hashCode() * 31 + base.hashCode()
 
     override fun compareTo(other: Dilution): Int = base.compareTo(other.base)
+
+    @JsName("convert")
+    operator fun <T : Dilution> invoke(d: DilutionType<T>) = d.create(d.fromBase(base))
 }
 
 /**
@@ -48,7 +52,6 @@ sealed class Dilution : Measure, Comparable<Dilution> {
 @SerialName("ppm")
 @JsExport
 class PartsPerMillion(override val value: Double = 0.0) : Dilution(), MeasureOperators<PartsPerMillion, Dilution> {
-    override val type: MeasureType = DilutionType.PartsPerMillionType
-    override fun create(v: Double) = PartsPerMillion(v)
+    override val type = DilutionType.PartsPerMillionType
 }
 

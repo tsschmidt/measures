@@ -13,15 +13,17 @@ import kotlin.js.JsName
  */
 @JsExport
 @Serializable
-sealed class RatioType(
+sealed class RatioType<out T : Ratio>(
     override val units: String = "",
     override val toBase: (Double) -> Double = identity,
-    override val fromBase: (Double) -> Double = identity
-) : MeasureType {
-    data object WeightToVolumeType : RatioType()
-    data object VolumeToWeightType : RatioType()
-    data object FlowType : RatioType()
-    data object VelocityType : RatioType()
+    override val fromBase: (Double) -> Double = identity,
+    @Suppress("UNCHECKED_CAST")
+    override val create: (Double) -> T = { v: Double -> WeightToVolume(v, WeightType.PoundType, VolumeType.GallonType) as T}
+) : MeasureType<Ratio> {
+    data object WeightToVolumeType : RatioType<Ratio>()
+    data object VolumeToWeightType : RatioType<Ratio>()
+    data object FlowType : RatioType<Ratio>()
+    data object VelocityType : RatioType<Ratio>()
 }
 
 /**
@@ -34,9 +36,9 @@ sealed class Ratio : Measure {
     override val base by lazy { type.toBase(value) }
     val units by lazy { "${n.units}/${d.units}" }
 
-    abstract val n : MeasureType
+    abstract val n : MeasureType<*>
 
-    abstract val d : MeasureType
+    abstract val d : MeasureType<*>
 
     fun toBase(v: Double) = n.toBase(value) / d.toBase(1.0)
 
@@ -49,7 +51,7 @@ sealed class Ratio : Measure {
     * @param num - [MeasureType] of numerator to convert.
     * @param den - [MeasureType] of denominator to convert.
     */
-    fun convert(num: MeasureType, den: MeasureType) = num.fromBase(base) / den.fromBase(1.0)
+    fun convert(num: MeasureType<*>, den: MeasureType<*>) = num.fromBase(base) / den.fromBase(1.0)
 }
 
 /**
@@ -64,11 +66,11 @@ sealed class Ratio : Measure {
 @JsExport
 class WeightToVolume(
     override val value: Double = 0.0,
-    override val n: WeightType,
-    override val d: VolumeType
+    override val n: WeightType<*>,
+    override val d: VolumeType<*>
 ) : Ratio(), MeasureOperators<WeightToVolume, WeightToVolume>, Comparable<WeightToVolume> {
 
-    override val type: MeasureType = RatioType.WeightToVolumeType
+    override val type: MeasureType<*> = RatioType.WeightToVolumeType
 
     override fun equals(other: Any?) = other != null && other is WeightToVolume && base == other.base
 
@@ -77,9 +79,7 @@ class WeightToVolume(
     override fun compareTo(other: WeightToVolume): Int = base.compareTo(other.base)
 
     @JsName("toWeightToVolume")
-    operator fun invoke(n: WeightType, d: VolumeType) = WeightToVolume(convert(n, d), n, d)
-
-    override fun create(v: Double) = WeightToVolume(v, n, d)
+    operator fun invoke(n: WeightType<*>, d: VolumeType<*>) = WeightToVolume(convert(n, d), n, d)
 }
 
 /**
@@ -94,11 +94,11 @@ class WeightToVolume(
 @JsExport
 class VolumeToWeight(
     override val value: Double = 0.0,
-    override val n: VolumeType,
-    override val d: WeightType
+    override val n: VolumeType<*>,
+    override val d: WeightType<*>
 ) : Ratio(), MeasureOperators<VolumeToWeight, VolumeToWeight>, Comparable<VolumeToWeight> {
 
-    override val type: MeasureType = RatioType.VolumeToWeightType
+    override val type: MeasureType<*> = RatioType.VolumeToWeightType
 
     override fun equals(other: Any?) = other != null && other is VolumeToWeight && base == other.base
 
@@ -107,9 +107,7 @@ class VolumeToWeight(
     override fun compareTo(other: VolumeToWeight): Int = base.compareTo(other.base)
 
     @JsName("convertVolumeToWeight")
-    operator fun invoke(n: VolumeType, d: WeightType) = VolumeToWeight(convert(n, d), n, d)
-
-    override fun create(v: Double) = VolumeToWeight(v, n, d)
+    operator fun invoke(n: VolumeType<*>, d: WeightType<*>) = VolumeToWeight(convert(n, d), n, d)
 }
 
 /**
@@ -124,11 +122,11 @@ class VolumeToWeight(
 @JsExport
 class Flow(
     override val value: Double = 0.0,
-    override val n: VolumeType,
-    override val d: TimeType
+    override val n: VolumeType<*>,
+    override val d: TimeType<*>
 ) : Ratio(), MeasureOperators<Flow, Flow>, Comparable<Flow> {
 
-    override val type: MeasureType = RatioType.FlowType
+    override val type: MeasureType<*> = RatioType.FlowType
 
     override fun equals(other: Any?) = other != null && other is Flow && base == other.base
 
@@ -137,9 +135,7 @@ class Flow(
     override fun compareTo(other: Flow): Int = base.compareTo(other.base)
 
     @JsName("convertFlow")
-    operator fun invoke(n: VolumeType, d: TimeType) = Flow(convert(n, d), n, d)
-
-    override fun create(v: Double) = Flow(v, n, d)
+    operator fun invoke(n: VolumeType<*>, d: TimeType<*>) = Flow(convert(n, d), n, d)
 }
 
 /**
@@ -154,11 +150,11 @@ class Flow(
 @JsExport
 class Velocity(
     override val value: Double = 0.0,
-    override val n: LengthType,
-    override val d: TimeType
+    override val n: LengthType<*>,
+    override val d: TimeType<*>
 ) : Ratio(), MeasureOperators<Velocity, Velocity>, Comparable<Velocity> {
 
-    override val type: MeasureType = RatioType.VelocityType
+    override val type: MeasureType<*> = RatioType.VelocityType
 
     override fun equals(other: Any?) = other != null && other is Velocity && base == other.base
 
@@ -167,7 +163,5 @@ class Velocity(
     override fun compareTo(other: Velocity): Int = base.compareTo(other.base)
 
     @JsName("convertVelocity")
-    operator fun invoke(n: LengthType, d: TimeType) = Velocity(convert(n, d), n, d)
-
-    override fun create(v: Double) = Velocity(v, n, d)
+    operator fun invoke(n: LengthType<*>, d: TimeType<*>) = Velocity(convert(n, d), n, d)
 }
