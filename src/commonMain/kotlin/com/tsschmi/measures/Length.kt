@@ -25,25 +25,25 @@ sealed class LengthType<out T : Length>(
     override val create: (Double) -> T
 ) : MeasureType<T>{
     @Serializable
-    data object InchType : LengthType<Inch>("in", inToCm, cmToIn, ::Inch)
+    data object InchType : LengthType<Inch>("in", toBase(M_INCH), fromBase(M_INCH), ::Inch)
 
     @Serializable
-    data object CentimeterType : LengthType<Centimeter>("cm", identity, identity, ::Centimeter)
+    data object CentimeterType : LengthType<Centimeter>("cm", toBase(M_CM), fromBase(M_CM), ::Centimeter)
 
     @Serializable
-    data object MeterType : LengthType<Meter>("m", mToCm, cmToM, ::Meter)
+    data object MeterType : LengthType<Meter>("m", identity, identity, ::Meter)
 
     @Serializable
-    data object FootType : LengthType<Foot>("ft", ftToCm, cmToFt, ::Foot)
+    data object FootType : LengthType<Foot>("ft", toBase(M_FOOT), fromBase(M_FOOT), ::Foot)
 
     @Serializable
-    data object KilometerType : LengthType<Kilometer>("km", kmToCm, cmToKm, ::Kilometer)
+    data object KilometerType : LengthType<Kilometer>("km", toBase(M_KM), fromBase(M_KM), ::Kilometer)
 
     @Serializable
-    data object MileType : LengthType<Mile>("mil", milToCm, cmToMil, ::Mile)
+    data object MileType : LengthType<Mile>("mil", toBase(M_MILE), fromBase(M_MILE), ::Mile)
 
     @Serializable
-    data object YardType : LengthType<Yard>("yd", ydToCm, cmToYd, ::Yard)
+    data object YardType : LengthType<Yard>("yd", toBase(M_YARD), fromBase(M_YARD), ::Yard)
 }
 
 /**
@@ -145,23 +145,9 @@ class Yard(override val value: Double = 0.0) : Length(), MeasureOperators<Yard, 
 }
 
 /** Constants used to convert [Length] values to base units */
-const val CM_INCH = 2.54
-const val CM_FOOT = 30.48
-const val CM_METER = 100.0
-const val CM_KM = CM_METER * 1000.0
-const val CM_MILE = 160934.0
-const val CM_YARD = CM_FOOT * 3.0
-
-/** Functions for converting [Length] values to base units and back to other units. */
-val inToCm = { v: Double -> v * CM_INCH }
-val cmToIn = { v: Double -> v / CM_INCH }
-val ftToCm = { v: Double -> v * CM_FOOT }
-val cmToFt = { v: Double -> v / CM_FOOT }
-val mToCm = { v: Double -> v * CM_METER }
-val cmToM = { v: Double -> v / CM_METER }
-val kmToCm = { v: Double -> v * CM_KM }
-val cmToKm = { v: Double -> v / CM_KM }
-val milToCm = { v: Double -> v * CM_MILE }
-val cmToMil = { v: Double -> v / CM_MILE }
-val ydToCm = { v: Double -> v * CM_YARD }
-val cmToYd = { v: Double -> v / CM_YARD }
+const val M_INCH = 39.3701
+const val M_FOOT = 3.28084
+const val M_CM = 100.0
+const val M_KM = 0.001
+const val M_MILE = 0.000621371
+const val M_YARD = 1.09361

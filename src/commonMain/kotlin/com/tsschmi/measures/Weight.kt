@@ -25,16 +25,16 @@ sealed class WeightType<out T : Weight>(
     override val create: (Double) -> T
 ): MeasureType<T> {
     @Serializable
-    data object KilogramType : WeightType<Kilogram>("kg", kgToLb, lbToKg, ::Kilogram)
+    data object KilogramType : WeightType<Kilogram>("kg", toBase(POUND_IN_KILOGRAM), fromBase(POUND_IN_KILOGRAM), ::Kilogram)
 
     @Serializable
-    data object GramType : WeightType<Gram>("g", gToLb, lbToG, ::Gram)
+    data object GramType : WeightType<Gram>("g", toBase(POUND_IN_GRAM), fromBase(POUND_IN_GRAM), ::Gram)
 
     @Serializable
     data object PoundType : WeightType<Pound>("lb", identity, identity, ::Pound)
 
     @Serializable
-    data object OunceType : WeightType<Ounce>("oz", ozToLb, lbToOz, ::Ounce)
+    data object OunceType : WeightType<Ounce>("oz", toBase(POUND_IN_OUNCE), fromBase(POUND_IN_OUNCE), ::Ounce)
 }
 
 /**
@@ -95,7 +95,7 @@ class Gram(override val value: Double = 0.0) : Weight(), MeasureOperators<Gram, 
 @SerialName("pound")
 @JsExport
 class Pound(override val value: Double = 0.0) : Weight(), MeasureOperators<Pound, Weight> {
-    override val type = KilogramType
+    override val type = PoundType
 }
 
 /**
@@ -111,14 +111,6 @@ class Ounce(override val value: Double = 0.0) : Weight(), MeasureOperators<Ounce
 }
 
 /* Constants used for converting from base unit(pounds) to other units */
-const val POUND_KILOGRAM = 0.453592
-const val POUND_GRAM = 453.592
-const val POUND_OUNCE = 0.0625
-
-/* Functions used for converting values between Weight units to the base unit(pounds) */
-val lbToKg = { v: Double -> v * POUND_KILOGRAM }
-val kgToLb = { v: Double -> v / POUND_KILOGRAM }
-val lbToG = { v: Double -> v * POUND_GRAM }
-val gToLb = { v: Double -> v / POUND_GRAM }
-val ozToLb = { v: Double -> v * POUND_OUNCE }
-val lbToOz = { v: Double -> v / POUND_OUNCE }
+const val POUND_IN_KILOGRAM = 0.453592
+const val POUND_IN_GRAM = 453.592
+const val POUND_IN_OUNCE = 16.0

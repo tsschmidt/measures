@@ -32,55 +32,24 @@ sealed interface Measure {
     fun format(d: Int = 2): String = formatNumber(value, d)
 
     operator fun invoke(): Double = value
+
+    fun v(t: MeasureType<*>): Double = t.fromBase(base)
 }
 
-sealed interface Ops<out T : Measure, in R : Measure> : Measure {
-
-    operator fun plus(o: R): T = this(type.fromBase(base + o.base))
-
-    operator fun minus(o: R): T = this(type.fromBase(base - o.base))
-
-    operator fun times(o: R): T = this(type.fromBase(base * o.base))
-
-    operator fun div(o: R): T = this(type.fromBase(base / o.base))
-
-    operator fun rem(o: R): T = this(type.fromBase(base % o.base))
-
-    operator fun unaryPlus(): T = this(-value)
-
-    operator fun unaryMinus(): T = this(+value)
-
-    @JsName("plusDouble")
-    operator fun plus(v: Double): T = this(value + v)
-
-    @JsName("minusDouble")
-    operator fun minus(v: Double): T = this(value - v)
-
-    @JsName("timesDouble")
-    operator fun times(v: Double): T = this(value * v)
-
-    @JsName("divDouble")
-    operator fun div(v: Double): T = this(value / v)
-
-    @JsName("remDouble")
-    operator fun rem(v: Double): T = this(value % v)
-
-    @JsName("toType")
-    @Suppress("UNCHECKED_CASt")
-    operator fun invoke(v: Double): T = (type as MeasureType<T>).create(v)
-}
 
 sealed interface Operators<R : Measure> : Measure {
 
-    operator fun plus(o: R) = this(type.fromBase(base + o.base))
+    private fun units(o: R) = if (type === o.type) o() else type.fromBase(o.base)
 
-    operator fun minus(o: R) = this(type.fromBase(base - o.base))
+    operator fun plus(o: R) = this(this() + units(o))
 
-    operator fun times(o: R) = this(type.fromBase(base * o.base))
+    operator fun minus(o: R) = this(this() - units(o))
 
-    operator fun div(o: R) = this(type.fromBase(base / o.base))
+    operator fun times(o: R) = this(this() * units(o))
 
-    operator fun rem(o: R) = this(type.fromBase(base % o.base))
+    operator fun div(o: R) = this(this() / units(o))
+
+    operator fun rem(o: R) = this(this() % units(o))
 
     operator fun unaryPlus() = this(-value)
 
@@ -111,7 +80,7 @@ sealed interface MeasureOperators<out T : R, R : Measure> : Operators<R> {
 
     override fun plus(o: R): T = super.plus(o) as T
 
-    override fun minus(o: R): T = super.plus(o) as T
+    override fun minus(o: R): T = super.minus(o) as T
 
     override fun times(o: R): T = super.times(o) as T
 
@@ -162,3 +131,7 @@ operator fun <R: Measure> Double.invoke(t: MeasureType<R>) = t.create(this)
 sealed interface Amount
 
 val identity = { v: Double -> v }
+
+fun toBase(factor: Double) : (Double)  -> Double =  {v: Double -> v / factor }
+
+fun fromBase(factor: Double) : (Double) -> Double = { v: Double -> v * factor }

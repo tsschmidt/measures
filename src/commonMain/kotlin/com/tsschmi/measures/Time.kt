@@ -28,22 +28,22 @@ sealed class TimeType<out T : Time>(
     data object SecondType : TimeType<Second>("sec", identity, identity, ::Second)
 
     @Serializable
-    data object MinuteType : TimeType<Minute>("min", mToS, sToM, ::Minute)
+    data object MinuteType : TimeType<Minute>("min", fromBase(SECONDS_IN_A_MINUTE), toBase(SECONDS_IN_A_MINUTE), ::Minute)
 
     @Serializable
-    data object HourType : TimeType<Hour>("hrs", hToS, sToH, ::Hour)
+    data object HourType : TimeType<Hour>("hrs", fromBase(SECONDS_IN_A_HOUR), toBase(SECONDS_IN_A_HOUR), ::Hour)
 
     @Serializable
-    data object DayType : TimeType<Day>("dys", dayToS, sToDay, ::Day)
+    data object DayType : TimeType<Day>("dys", fromBase(SECONDS_IN_A_DAY), toBase(SECONDS_IN_A_DAY), ::Day)
 
     @Serializable
-    data object WeekType : TimeType<Week>("wks", wkToS, sToWk, ::Week)
+    data object WeekType : TimeType<Week>("wks", fromBase(SECONDS_IN_A_WEEK), toBase(SECONDS_IN_A_WEEK), ::Week)
 
     @Serializable
-    data object MonthType : TimeType<Month>("mos", mthToS, sToMth, ::Month)
+    data object MonthType : TimeType<Month>("mos", fromBase(SECONDS_IN_A_MONTH), toBase(SECONDS_IN_A_MONTH), ::Month)
 
     @Serializable
-    data object YearType : TimeType<Year>("yrs", yrToS, sToYr, ::Year)
+    data object YearType : TimeType<Year>("yrs", fromBase(SECONDS_IN_A_YEAR), toBase(SECONDS_IN_A_YEAR), ::Year)
 }
 
 /**
@@ -158,16 +158,9 @@ const val SECONDS_IN_A_WEEK = DAYS_IN_A_WEEK * SECONDS_IN_A_DAY
 const val SECONDS_IN_A_MONTH = DAYS_IN_MONTH * SECONDS_IN_A_DAY
 const val SECONDS_IN_A_YEAR = DAYS_IN_A_YEAR * SECONDS_IN_A_DAY
 
-/** Functions for converting [Time] values to and from base units */
-val mToS = { v: Double -> v * SECONDS_IN_A_MINUTE }
-val sToM = { v: Double -> v / SECONDS_IN_A_MINUTE }
-val hToS = { v: Double -> v * SECONDS_IN_A_HOUR }
-val sToH = { v: Double -> v / SECONDS_IN_A_HOUR }
-val dayToS = { v: Double -> v * SECONDS_IN_A_DAY }
-val sToDay = { v: Double -> v / SECONDS_IN_A_DAY }
-val wkToS = { v: Double -> v * SECONDS_IN_A_WEEK }
-val sToWk = { v: Double -> v / SECONDS_IN_A_WEEK }
-val mthToS = { v: Double -> v * SECONDS_IN_A_MONTH }
-val sToMth = { v: Double -> v / SECONDS_IN_A_MONTH }
-val yrToS = { v: Double -> v * SECONDS_IN_A_YEAR }
-val sToYr = { v: Double -> v / SECONDS_IN_A_YEAR }
+const val S_MINUTE = 0.0166667
+const val S_HOUR  =  0.000277778
+const val S_DAY = 1.1574e-5
+const val S_WEEK = 1.6534e-6
+const val S_MONTH = 3.8052e-7
+const val S_YEAR = 3.171e-8

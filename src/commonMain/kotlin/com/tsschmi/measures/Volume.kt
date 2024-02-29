@@ -18,31 +18,31 @@ sealed class VolumeType<out T : Volume>(
     override val create: (Double) -> T
 ) : MeasureType<T> {
     @Serializable
-    data object LiterType : VolumeType<Liter>("l", lToQt, qtToL, ::Liter)
+    data object LiterType : VolumeType<Liter>("l", identity, identity, ::Liter)
 
     @Serializable
-    data object MilliliterType : VolumeType<Milliliter>("ml", mlToQt, qtToMl, ::Milliliter)
+    data object MilliliterType : VolumeType<Milliliter>("ml", toBase(L_MILLILITER), fromBase(L_MILLILITER), ::Milliliter)
 
     @Serializable
-    data object GallonType : VolumeType<Gallon>("gal", galToQt, qtToGal, ::Gallon)
+    data object GallonType : VolumeType<Gallon>("gal", toBase(L_GALLON), fromBase(L_GALLON), ::Gallon)
 
     @Serializable
-    data object QuartType : VolumeType<Quart>("qt", identity, identity, ::Quart)
+    data object QuartType : VolumeType<Quart>("qt", toBase(L_QUART), fromBase(L_QUART), ::Quart)
 
     @Serializable
-    data object PintType : VolumeType<Pint>("pt", pToQt, qtToP, ::Pint)
+    data object PintType : VolumeType<Pint>("pt", toBase(L_PINT), fromBase(L_PINT), ::Pint)
 
     @Serializable
-    data object CupType : VolumeType<Cup>("c", cToQt, qtToC, ::Cup)
+    data object CupType : VolumeType<Cup>("c", toBase(L_CUP), fromBase(L_CUP), ::Cup)
 
     @Serializable
-    data object TablespoonType : VolumeType<Tablespoon>("tbsp", tbspToQt, qtToTbsp, ::Tablespoon)
+    data object TablespoonType : VolumeType<Tablespoon>("tbsp", toBase(L_TABLESPOON), fromBase(L_TABLESPOON), ::Tablespoon)
 
     @Serializable
-    data object TeaspoonType: VolumeType<Teaspoon>("tsp", tspToQt, qtToTsp, ::Teaspoon)
+    data object TeaspoonType: VolumeType<Teaspoon>("tsp", toBase(L_TEASPOON), fromBase(L_TEASPOON), ::Teaspoon)
 
     @Serializable
-    data object FluidOunceType: VolumeType<FluidOunce>("fl. oz", flozToQt, qtToFloz, ::FluidOunce)
+    data object FluidOunceType: VolumeType<FluidOunce>("fl. oz", toBase(L_FLUID_OUNCE), fromBase(L_FLUID_OUNCE), ::FluidOunce)
 }
 
 /**
@@ -165,29 +165,11 @@ class FluidOunce(override val value: Double = 0.0) : Volume(), MeasureOperators<
 }
 
 /** Constants used in converting [Volume] values to and from base units */
-const val QT_GALLON = 4.0
-const val QT_LITER = 1.05669
-const val QT_MILLILITER = 0.00105669
-const val QT_PINT = 0.5
-const val QT_CUP = 0.25
-const val QT_TABLESPOON = 0.015625
-const val QT_TEASPOON = 0.00520833
-const val QT_FLUID_OUNCE = 0.03215
-
-/** Functions to convert [Volume] values from a base unit to other units */
-val galToQt = { v: Double -> v * QT_GALLON }
-val qtToGal = { v: Double -> v / QT_GALLON }
-val lToQt = { v: Double -> v * QT_LITER }
-val qtToL = { v: Double -> v / QT_LITER }
-val mlToQt = { v: Double -> v * QT_MILLILITER }
-val qtToMl = { v: Double -> v / QT_MILLILITER }
-val pToQt = { v: Double -> v * QT_PINT }
-val qtToP = { v: Double -> v / QT_PINT }
-val cToQt = { v: Double -> v * QT_CUP }
-val qtToC = { v: Double -> v / QT_CUP }
-val tbspToQt = { v: Double -> v * QT_TABLESPOON }
-val qtToTbsp = { v: Double -> v / QT_TABLESPOON }
-val tspToQt = { v: Double -> v * QT_TEASPOON }
-val qtToTsp = { v: Double -> v / QT_TEASPOON }
-val flozToQt = { v: Double -> v * QT_FLUID_OUNCE }
-val qtToFloz = { v: Double -> v / QT_FLUID_OUNCE }
+const val L_GALLON = 0.264172
+const val L_QUART = 1.05669
+const val L_MILLILITER = 1000.0
+const val L_PINT = 2.11338
+const val L_CUP = 4.16667
+const val L_TABLESPOON = 67.628
+const val L_TEASPOON = 202.884
+const val L_FLUID_OUNCE = 33.814
