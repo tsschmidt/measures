@@ -9,6 +9,5 @@ class RatioTest {
     @Test
     fun ratio() {
        val r: Ratio = WeightToVolume(1.5, WeightType.PoundType, VolumeType.GallonType)
-        println(Json.encodeToString(r))
     }
 }

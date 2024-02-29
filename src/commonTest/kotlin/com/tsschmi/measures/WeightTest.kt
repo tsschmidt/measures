@@ -3,30 +3,35 @@ import com.tsschmi.measures.Weight.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.asserter
 
 class WeightTest {
 
     @Test
-    fun testEquals() {
-        val k: Weight = Kilogram(1.0)
-        val k1 = k + Pound(2.0)
-
-        val k2 = (2.0 * Kilogram(2.0))(WeightType.PoundType)
-        val k3 = 3.0(WeightType.KilogramType)
-
-        val eq = 2.0 * ((k - k1) / k2())
-        println(k2.display(2))
-        println("${k1(WeightType.PoundType)()}, ${k1.gram}, ${k1.ounce}, ${k1.pound}")
+    fun testKilogram() {
+        val k = Kilogram(1.0)
+        assertEquals("1.00kg", k.display(2))
+        assertEquals(2.20462, k.pound, .00001)
+        assertEquals(35.274, k.ounce, 0.001)
+        assertEquals(1000.0, k.gram)
+        val kt = k + k
+        assertEquals(2.0, kt())
+        val k3 = k - k
+        assertEquals(0.0, k3())
+        val k4 = kt * kt
+        assertEquals(4.0, k4(), 0.0001)
+        val k5 = kt.pound / kt.pound
+        assertEquals(1.0, k5)
+        assertEquals(16.0, (k4 * k4)(), 0.0001)
+        assertEquals(2.0, (Kilogram(6.0) % Kilogram(4.0))())
+        assertEquals(2.0, (Kilogram(1.0) + Pound(2.20462))(), 0.0001)
+        assertEquals(2.0, (Kilogram(1.0) + Ounce(35.274))(), 0.0001)
+        assertEquals(2.0, (Kilogram(1.0) + Gram(1000.0))(), 0.0001)
+        assertEquals(3.0, (Kilogram(1.0) + Gram(1000.0) + Pound(2.20462))(), 0.0001)
+        assertEquals(2.0, (Pound(1.0) + Ounce(16.0))())
     }
 
-    @Test
-    fun testSerialization() {
-        val sg: Weight = Pound(1.0)
-        val json = Json.encodeToString(sg)
-        println(json)
-        val des: Weight = Json.decodeFromString(json)
-        println(des.display(2))
-    }
     /*
     @Test
     fun getBase() {
