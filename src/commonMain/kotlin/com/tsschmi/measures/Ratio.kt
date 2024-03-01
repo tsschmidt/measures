@@ -18,7 +18,7 @@ sealed class RatioType<out T : Ratio>(
     override val toBase: (Double) -> Double = identity,
     override val fromBase: (Double) -> Double = identity,
     @Suppress("UNCHECKED_CAST")
-    override val create: (Double) -> T = { v: Double -> WeightToVolume(v, WeightType.PoundType, VolumeType.GallonType) as T}
+    override val create: (Double) -> T = { v: Double -> WeightToVolume(v, MassType.PoundType, VolumeType.GallonType) as T}
 ) : MeasureType<Ratio> {
     data object WeightToVolumeType : RatioType<Ratio>()
     data object VolumeToWeightType : RatioType<Ratio>()
@@ -66,7 +66,7 @@ sealed class Ratio : Measure {
 @JsExport
 class WeightToVolume(
     override val value: Double = 0.0,
-    override val n: WeightType<*>,
+    override val n: MassType<*>,
     override val d: VolumeType<*>
 ) : Ratio(), MeasureOperators<WeightToVolume, WeightToVolume>, Comparable<WeightToVolume> {
 
@@ -79,7 +79,7 @@ class WeightToVolume(
     override fun compareTo(other: WeightToVolume): Int = base.compareTo(other.base)
 
     @JsName("toWeightToVolume")
-    operator fun invoke(n: WeightType<*>, d: VolumeType<*>) = WeightToVolume(convert(n, d), n, d)
+    operator fun invoke(n: MassType<*>, d: VolumeType<*>) = WeightToVolume(convert(n, d), n, d)
 }
 
 /**
@@ -95,7 +95,7 @@ class WeightToVolume(
 class VolumeToWeight(
     override val value: Double = 0.0,
     override val n: VolumeType<*>,
-    override val d: WeightType<*>
+    override val d: MassType<*>
 ) : Ratio(), MeasureOperators<VolumeToWeight, VolumeToWeight>, Comparable<VolumeToWeight> {
 
     override val type: MeasureType<*> = RatioType.VolumeToWeightType
@@ -107,7 +107,7 @@ class VolumeToWeight(
     override fun compareTo(other: VolumeToWeight): Int = base.compareTo(other.base)
 
     @JsName("convertVolumeToWeight")
-    operator fun invoke(n: VolumeType<*>, d: WeightType<*>) = VolumeToWeight(convert(n, d), n, d)
+    operator fun invoke(n: VolumeType<*>, d: MassType<*>) = VolumeToWeight(convert(n, d), n, d)
 }
 
 /**

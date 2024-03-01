@@ -1,12 +1,8 @@
 package com.tsschmi.measures
-import com.tsschmi.measures.Weight.*
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.asserter
 
-class WeightTest {
+class MassTest {
 
     @Test
     fun testKilogram() {

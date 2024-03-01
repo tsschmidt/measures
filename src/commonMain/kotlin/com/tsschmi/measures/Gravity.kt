@@ -63,6 +63,13 @@ sealed class Gravity : Measure, Operators<Gravity>, Comparable<Gravity> {
 
     @JsName("convert")
     operator fun <T : Gravity> invoke(g: GravityType<T>) = g.create(g.fromBase(base))
+
+    /** inc() and dec() implemented here instead of interface because of a Kotlin generics issue */
+    @JsExport.Ignore
+    operator fun inc() = this(value + 1.0)
+
+    @JsExport.Ignore
+    operator fun dec() = this(value - 1.0)
 }
 
 

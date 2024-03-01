@@ -72,6 +72,13 @@ sealed class Volume : Measure, Amount, Operators<Volume>, Comparable<Volume> {
 
     @JsName("convert")
     operator fun <T : Volume> invoke(v: VolumeType<T>) = v.create(v.fromBase(base))
+
+    /** inc() and dec() implemented here instead of interface because of a Kotlin generics issue */
+    @JsExport.Ignore
+    operator fun inc() = this(value + 1.0)
+
+    @JsExport.Ignore
+    operator fun dec() = this(value - 1.0)
 }
 
 /**

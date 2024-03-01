@@ -71,6 +71,13 @@ sealed class Length : Measure, Operators<Length>, Comparable<Length> {
 
     @JsName("Create")
     operator fun <T : Length> invoke(l : LengthType<T>) = l.create(l.fromBase(base))
+
+    /** inc() and dec() implemented here instead of interface because of a Kotlin generics issue */
+    @JsExport.Ignore
+    operator fun inc() = this(value + 1.0)
+
+    @JsExport.Ignore
+    operator fun dec() = this(value - 1.0)
 }
 
 /**

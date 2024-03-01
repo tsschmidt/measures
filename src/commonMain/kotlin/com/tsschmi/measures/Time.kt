@@ -71,6 +71,13 @@ sealed class Time : Measure, Operators<Time>, Comparable<Time> {
 
     @JsName("convert")
     operator fun <T : Time> invoke(t: TimeType<T>) = t.create(t.fromBase(base))
+
+    /** inc() and dec() implemented here instead of interface because of a Kotlin generics issue */
+    @JsExport.Ignore
+    operator fun inc() = this(value + 1.0)
+
+    @JsExport.Ignore
+    operator fun dec() = this(value - 1.0)
 }
 
 /**
