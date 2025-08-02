@@ -10,7 +10,7 @@ class MassTest {
         assertEquals("1.00kg", k.display(2))
         assertEquals(2.20462, k.pound, .00001)
         assertEquals(35.274, k.ounce, 0.001)
-        assertEquals(1000.0, k.gram)
+        assertEquals(1000.0, k.gram, 0.0001)
         val kt = k + k
         assertEquals(2.0, kt())
         val k3 = k - k

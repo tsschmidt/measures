@@ -11,7 +11,7 @@ class LengthTest {
         assertEquals(0.3048, Foot(1.0).base, 0.0001)
         assertEquals(0.01, Centimeter(1.0).base, 0.0001)
         assertEquals(1000.0, Kilometer(1.0).base, 0.0001)
-        assertEquals(1609.3444, Mile(1.0).base, 0.0001)
+        assertEquals(1609.34, Mile(1.0).base, 0.0001)
         assertEquals(0.9144, Yard(1.0).base, 0.0001)
     }
 

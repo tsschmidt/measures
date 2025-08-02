@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 import kotlin.js.ExperimentalJsExport
 import kotlin.js.JsExport
 import com.tsschmi.measures.VolumeType.*
+import kotlinx.serialization.Polymorphic
 import kotlin.js.JsName
 
 @JsExport
@@ -21,28 +22,28 @@ sealed class VolumeType<out T : Volume>(
     data object LiterType : VolumeType<Liter>("l", identity, identity, ::Liter)
 
     @Serializable
-    data object MilliliterType : VolumeType<Milliliter>("ml", toBase(L_MILLILITER), fromBase(L_MILLILITER), ::Milliliter)
+    data object MilliliterType : VolumeType<Milliliter>("ml", toBase(MILLILITER_TO_LITER), fromBase(MILLILITER_TO_LITER), ::Milliliter)
 
     @Serializable
-    data object GallonType : VolumeType<Gallon>("gal", toBase(L_GALLON), fromBase(L_GALLON), ::Gallon)
+    data object GallonType : VolumeType<Gallon>("gal", toBase(GALLON_TO_LITER), fromBase(GALLON_TO_LITER), ::Gallon)
 
     @Serializable
-    data object QuartType : VolumeType<Quart>("qt", toBase(L_QUART), fromBase(L_QUART), ::Quart)
+    data object QuartType : VolumeType<Quart>("qt", toBase(QUART_TO_LITER), fromBase(QUART_TO_LITER), ::Quart)
 
     @Serializable
-    data object PintType : VolumeType<Pint>("pt", toBase(L_PINT), fromBase(L_PINT), ::Pint)
+    data object PintType : VolumeType<Pint>("pt", toBase(PINT_TO_LITER), fromBase(PINT_TO_LITER), ::Pint)
 
     @Serializable
-    data object CupType : VolumeType<Cup>("c", toBase(L_CUP), fromBase(L_CUP), ::Cup)
+    data object CupType : VolumeType<Cup>("c", toBase(CUP_TO_LITER), fromBase(CUP_TO_LITER), ::Cup)
 
     @Serializable
-    data object TablespoonType : VolumeType<Tablespoon>("tbsp", toBase(L_TABLESPOON), fromBase(L_TABLESPOON), ::Tablespoon)
+    data object TablespoonType : VolumeType<Tablespoon>("tbsp", toBase(TABLESPOON_TO_LITER), fromBase(TABLESPOON_TO_LITER), ::Tablespoon)
 
     @Serializable
-    data object TeaspoonType: VolumeType<Teaspoon>("tsp", toBase(L_TEASPOON), fromBase(L_TEASPOON), ::Teaspoon)
+    data object TeaspoonType: VolumeType<Teaspoon>("tsp", toBase(TEASPOON_TO_LITER), fromBase(TEASPOON_TO_LITER), ::Teaspoon)
 
     @Serializable
-    data object FluidOunceType: VolumeType<FluidOunce>("fl. oz", toBase(L_FLUID_OUNCE), fromBase(L_FLUID_OUNCE), ::FluidOunce)
+    data object FluidOunceType: VolumeType<FluidOunce>("fl. oz", toBase(FLUID_OUNCE_TO_LITER), fromBase(FLUID_OUNCE_TO_LITER), ::FluidOunce)
 }
 
 /**
@@ -107,6 +108,7 @@ class Milliliter(override val value: Double = 0.0) : Volume(), MeasureOperators<
 @Serializable
 @SerialName("gallon")
 @JsExport
+@Polymorphic
 class Gallon(override val value: Double = 0.0) : Volume(), MeasureOperators<Gallon, Volume> {
     override val type = GallonType
 }
@@ -172,11 +174,22 @@ class FluidOunce(override val value: Double = 0.0) : Volume(), MeasureOperators<
 }
 
 /** Constants used in converting [Volume] values to and from base units */
-const val L_GALLON = 0.264172
-const val L_QUART = 1.05669
-const val L_MILLILITER = 1000.0
-const val L_PINT = 2.11338
-const val L_CUP = 4.16667
-const val L_TABLESPOON = 67.628
-const val L_TEASPOON = 202.884
-const val L_FLUID_OUNCE = 33.814
+//const val L_GALLON = 0.264172
+//const val L_QUART = 1.05669
+//const val L_MILLILITER = 1000.0
+//const val L_PINT = 2.11338
+//const val L_CUP = 4.16667
+//const val L_TABLESPOON = 67.628
+//const val L_TEASPOON = 202.884
+//const val L_FLUID_OUNCE = 33.814
+
+const val GALLON_TO_LITER = 3.78541
+const val QUART_TO_LITER = 0.946353
+const val MILLILITER_TO_LITER = 0.001
+const val PINT_TO_LITER = 0.473176
+const val CUP_TO_LITER = 0.24
+const val TABLESPOON_TO_LITER = 0.0147868
+const val TEASPOON_TO_LITER = 0.00492892
+const val FLUID_OUNCE_TO_LITER = 0.0295735
+
+

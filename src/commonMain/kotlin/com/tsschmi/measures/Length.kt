@@ -25,25 +25,25 @@ sealed class LengthType<out T : Length>(
     override val create: (Double) -> T
 ) : MeasureType<T>{
     @Serializable
-    data object InchType : LengthType<Inch>("in", toBase(M_INCH), fromBase(M_INCH), ::Inch)
+    data object InchType : LengthType<Inch>("in", toBase(INCH_TO_METER), fromBase(INCH_TO_METER), ::Inch)
 
     @Serializable
-    data object CentimeterType : LengthType<Centimeter>("cm", toBase(M_CM), fromBase(M_CM), ::Centimeter)
+    data object CentimeterType : LengthType<Centimeter>("cm", toBase(CM_TO_METER), fromBase(CM_TO_METER), ::Centimeter)
 
     @Serializable
     data object MeterType : LengthType<Meter>("m", identity, identity, ::Meter)
 
     @Serializable
-    data object FootType : LengthType<Foot>("ft", toBase(M_FOOT), fromBase(M_FOOT), ::Foot)
+    data object FootType : LengthType<Foot>("ft", toBase(FOOT_TO_METER), fromBase(FOOT_TO_METER), ::Foot)
 
     @Serializable
-    data object KilometerType : LengthType<Kilometer>("km", toBase(M_KM), fromBase(M_KM), ::Kilometer)
+    data object KilometerType : LengthType<Kilometer>("km", toBase(KM_TO_METER), fromBase(KM_TO_METER), ::Kilometer)
 
     @Serializable
-    data object MileType : LengthType<Mile>("mil", toBase(M_MILE), fromBase(M_MILE), ::Mile)
+    data object MileType : LengthType<Mile>("mil", toBase(MILE_TO_METER), fromBase(MILE_TO_METER), ::Mile)
 
     @Serializable
-    data object YardType : LengthType<Yard>("yd", toBase(M_YARD), fromBase(M_YARD), ::Yard)
+    data object YardType : LengthType<Yard>("yd", toBase(YARD_TO_METER), fromBase(YARD_TO_METER), ::Yard)
 }
 
 /**
@@ -152,9 +152,16 @@ class Yard(override val value: Double = 0.0) : Length(), MeasureOperators<Yard, 
 }
 
 /** Constants used to convert [Length] values to base units */
-const val M_INCH = 39.3701
-const val M_FOOT = 3.28084
-const val M_CM = 100.0
-const val M_KM = 0.001
-const val M_MILE = 0.000621371
-const val M_YARD = 1.09361
+//const val M_INCH = 39.3701
+//const val M_FOOT = 3.28084
+//const val M_CM = 100.0
+//const val M_KM = 0.001
+//const val M_MILE = 0.000621371
+//const val M_YARD = 1.09361
+
+const val INCH_TO_METER = 0.0254
+const val FOOT_TO_METER = 0.3048
+const val CM_TO_METER = 0.01
+const val KM_TO_METER = 1000.0
+const val MILE_TO_METER = 1609.34
+const val YARD_TO_METER = 0.9144

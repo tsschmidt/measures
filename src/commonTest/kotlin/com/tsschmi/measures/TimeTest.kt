@@ -12,7 +12,7 @@ class TimeTest {
         assertEquals(86400.0, Day(1.0).base, 0.0001)
         assertEquals(604800.0, Week(1.0).base, 0.0001)
         assertEquals(2.628e+6, Month(1.0).base, 0.0001)
-        assertEquals(SECONDS_IN_A_YEAR, Year(1.0).base, 0.0001)
+        assertEquals(YEAR_SECONDS, Year(1.0).base, 0.0001)
     }
 
     @Test

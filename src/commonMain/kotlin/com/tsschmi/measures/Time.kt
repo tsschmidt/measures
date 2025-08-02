@@ -28,22 +28,22 @@ sealed class TimeType<out T : Time>(
     data object SecondType : TimeType<Second>("sec", identity, identity, ::Second)
 
     @Serializable
-    data object MinuteType : TimeType<Minute>("min", fromBase(SECONDS_IN_A_MINUTE), toBase(SECONDS_IN_A_MINUTE), ::Minute)
+    data object MinuteType : TimeType<Minute>("min", toBase(MINUTE_TO_SECONDS), fromBase(MINUTE_TO_SECONDS), ::Minute)
 
     @Serializable
-    data object HourType : TimeType<Hour>("hrs", fromBase(SECONDS_IN_A_HOUR), toBase(SECONDS_IN_A_HOUR), ::Hour)
+    data object HourType : TimeType<Hour>("hrs", toBase(HOUR_TO_SECONDS), fromBase(HOUR_TO_SECONDS), ::Hour)
 
     @Serializable
-    data object DayType : TimeType<Day>("dys", fromBase(SECONDS_IN_A_DAY), toBase(SECONDS_IN_A_DAY), ::Day)
+    data object DayType : TimeType<Day>("dys", toBase(DAY_TO_SECONDS), fromBase(DAY_TO_SECONDS), ::Day)
 
     @Serializable
-    data object WeekType : TimeType<Week>("wks", fromBase(SECONDS_IN_A_WEEK), toBase(SECONDS_IN_A_WEEK), ::Week)
+    data object WeekType : TimeType<Week>("wks", toBase(WEEK_TO_SECONDS), fromBase(WEEK_TO_SECONDS), ::Week)
 
     @Serializable
-    data object MonthType : TimeType<Month>("mos", fromBase(SECONDS_IN_A_MONTH), toBase(SECONDS_IN_A_MONTH), ::Month)
+    data object MonthType : TimeType<Month>("mos", toBase(MONTH_TO_SECONDS), fromBase(MONTH_TO_SECONDS), ::Month)
 
     @Serializable
-    data object YearType : TimeType<Year>("yrs", fromBase(SECONDS_IN_A_YEAR), toBase(SECONDS_IN_A_YEAR), ::Year)
+    data object YearType : TimeType<Year>("yrs", toBase(YEAR_SECONDS), fromBase(YEAR_SECONDS), ::Year)
 }
 
 /**
@@ -158,16 +158,16 @@ const val DAYS_IN_MONTH = DAYS_IN_A_YEAR / MONTHS_IN_A_YEAR
 const val DAYS_IN_A_WEEK = 7.0
 const val HOURS_IN_A_DAY = 24.0
 const val MINUTES_IN_A_HOUR = 60.0
-const val SECONDS_IN_A_MINUTE = 60.0
-const val SECONDS_IN_A_HOUR = MINUTES_IN_A_HOUR * SECONDS_IN_A_MINUTE
-const val SECONDS_IN_A_DAY = HOURS_IN_A_DAY * SECONDS_IN_A_HOUR
-const val SECONDS_IN_A_WEEK = DAYS_IN_A_WEEK * SECONDS_IN_A_DAY
-const val SECONDS_IN_A_MONTH = DAYS_IN_MONTH * SECONDS_IN_A_DAY
-const val SECONDS_IN_A_YEAR = DAYS_IN_A_YEAR * SECONDS_IN_A_DAY
+const val MINUTE_TO_SECONDS = 60.0
+const val HOUR_TO_SECONDS = 3600.0
+const val DAY_TO_SECONDS = HOURS_IN_A_DAY * HOUR_TO_SECONDS
+const val WEEK_TO_SECONDS = DAYS_IN_A_WEEK * DAY_TO_SECONDS
+const val MONTH_TO_SECONDS = DAYS_IN_MONTH * DAY_TO_SECONDS
+const val YEAR_SECONDS = DAYS_IN_A_YEAR * DAY_TO_SECONDS
 
-const val S_MINUTE = 0.0166667
-const val S_HOUR  =  0.000277778
-const val S_DAY = 1.1574e-5
-const val S_WEEK = 1.6534e-6
-const val S_MONTH = 3.8052e-7
-const val S_YEAR = 3.171e-8
+//const val S_MINUTE = 0.0166667
+//const val S_HOUR  =  0.000277778
+//const val S_DAY = 1.1574e-5
+//const val S_WEEK = 1.6534e-6
+//const val S_MONTH = 3.8052e-7
+//const val S_YEAR = 3.171e-8

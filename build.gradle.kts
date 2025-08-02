@@ -1,10 +1,10 @@
 plugins {
-    kotlin("multiplatform") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("multiplatform") version "2.0.21"
+    kotlin("plugin.serialization") version "2.0.21"
     id("io.spring.dependency-management") version "1.0.11.RELEASE"
     id("maven-publish")
-    kotlin("plugin.allopen") version "1.9.22"
-    kotlin("plugin.jpa") version "1.9.22"
+    kotlin("plugin.allopen") version "2.0.21"
+    kotlin("plugin.jpa") version "2.0.21"
 }
 
 group = "com.tsschmi"
@@ -18,7 +18,7 @@ kotlin {
 
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "17"
+            compileKotlinTask.kotlinOptions.jvmTarget = "17"
         }
         withJava()
         testRuns["test"].executionTask.configure {

@@ -17,17 +17,23 @@ import kotlin.js.JsName
  */
 @JsExport
 @Serializable
-sealed class ConcentratrionType<out T : Concentration>(
+sealed class ConcentrationType<out T : Concentration>(
     override val units: String,
     override val toBase: (Double) -> Double,
     override val fromBase: (Double) -> Double,
     override val create: (Double) -> T
 ) : MeasureType<T> {
     @Serializable
-    data object PartsPerMillionType : ConcentratrionType<PartsPerMillion>("ppm", identity, identity, ::PartsPerMillion)
+    data object PartsPerMillionType : ConcentrationType<PartsPerMillion>("ppm", identity, identity, ::PartsPerMillion)
 
     @Serializable
-    data object PartsPerBillionType: ConcentratrionType<PartsPerBillion>("ppb", identity, identity, ::PartsPerBillion)
+    data object PartsPerBillionType: ConcentrationType<PartsPerBillion>("ppb", identity, identity, ::PartsPerBillion)
+
+    @Serializable
+    data object MassPercentType: ConcentrationType<MassPercent>("m/m%", identity, identity, ::MassPercent)
+
+    @Serializable
+    data object VolumePercentType: ConcentrationType<VolumePercent>("v/v%", identity, identity, ::VolumePercent)
 }
 
 /**
@@ -45,7 +51,7 @@ sealed class Concentration : Measure, Operators<Concentration>, Comparable<Conce
     override fun compareTo(other: Concentration): Int = base.compareTo(other.base)
 
     @JsName("convert")
-    operator fun <T : Concentration> invoke(d: ConcentratrionType<T>) = d.create(d.fromBase(base))
+    operator fun <T : Concentration> invoke(d: ConcentrationType<T>) = d.create(d.fromBase(base))
 
     /** inc() and dec() implemented here instead of interface because of a Kotlin generics issue */
     @JsExport.Ignore
@@ -62,13 +68,26 @@ sealed class Concentration : Measure, Operators<Concentration>, Comparable<Conce
 @SerialName("ppm")
 @JsExport
 class PartsPerMillion(override val value: Double = 0.0) : Concentration(), MeasureOperators<PartsPerMillion, Concentration> {
-    override val type = ConcentratrionType.PartsPerMillionType
+    override val type = ConcentrationType.PartsPerMillionType
 }
 
 @Serializable
 @SerialName("ppb")
 @JsExport
 class PartsPerBillion(override val value: Double = 0.0) : Concentration(), MeasureOperators<PartsPerBillion, Concentration> {
-    override val type = ConcentratrionType.PartsPerBillionType
+    override val type = ConcentrationType.PartsPerBillionType
 }
 
+@Serializable
+@SerialName("mass_percent")
+@JsExport
+class MassPercent(override val value: Double = 0.0) : Concentration(), MeasureOperators<MassPercent, Concentration> {
+    override val type = ConcentrationType.MassPercentType
+}
+
+@Serializable
+@SerialName("volume_percent")
+@JsExport
+class VolumePercent(override  val value: Double = 0.0) : Concentration(), MeasureOperators<VolumePercent, Concentration> {
+    override val type = ConcentrationType.VolumePercentType
+}
